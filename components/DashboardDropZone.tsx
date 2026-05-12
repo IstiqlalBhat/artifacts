@@ -35,8 +35,8 @@ export function DashboardDropZone({ children }: { children: React.ReactNode }) {
                   Drop to create a new artifact
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Folder name becomes the title. HTML, CSS, JS, JSX, TS, TSX are
-                  imported with their relative paths.
+                  Folder name becomes the title. HTML, CSS, JS, JSX, TS, TSX,
+                  and images are imported with their relative paths.
                 </p>
               </>
             )}

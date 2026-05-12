@@ -66,7 +66,8 @@ export function CreateArtifactView() {
               automatically.
             </p>
             <p className="mx-auto mt-2 max-w-md text-xs text-muted-foreground">
-              HTML, CSS, JS, JSX, TS, and TSX are imported. Up to 50 files.
+              HTML, CSS, JS, JSX, TS, TSX, and images (PNG, JPG, GIF, WEBP,
+              SVG) are imported. Up to 80 files, 6 MB total.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

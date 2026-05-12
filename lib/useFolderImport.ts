@@ -9,8 +9,10 @@ import {
   type ArtifactKind,
 } from "@/lib/renderer";
 
-const SUPPORTED = /\.(html?|css|m?js|jsx|tsx|ts)$/i;
-const MAX_FILES = 50;
+const SUPPORTED =
+  /\.(html?|css|m?js|jsx|tsx|ts|json|png|jpe?g|gif|webp|avif|svg|ico|bmp)$/i;
+const BINARY = /\.(png|jpe?g|gif|webp|avif|ico|bmp)$/i;
+const MAX_FILES = 80;
 
 const baseName = (path: string) => path.split("/").pop() ?? path;
 const isRoot = (path: string) => !path.includes("/");
@@ -21,7 +23,30 @@ function detectType(name: string): string {
   if (/\.m?js$/i.test(name)) return "text/javascript";
   if (/\.tsx?$/i.test(name)) return "text/typescript";
   if (/\.jsx$/i.test(name)) return "text/jsx";
+  if (/\.json$/i.test(name)) return "application/json";
+  if (/\.svg$/i.test(name)) return "image/svg+xml";
+  if (/\.png$/i.test(name)) return "image/png";
+  if (/\.jpe?g$/i.test(name)) return "image/jpeg";
+  if (/\.gif$/i.test(name)) return "image/gif";
+  if (/\.webp$/i.test(name)) return "image/webp";
+  if (/\.avif$/i.test(name)) return "image/avif";
+  if (/\.ico$/i.test(name)) return "image/x-icon";
+  if (/\.bmp$/i.test(name)) return "image/bmp";
   return "text/plain";
+}
+
+async function fileToBase64(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + CHUNK) as unknown as number[],
+    );
+  }
+  return btoa(binary);
 }
 
 function readDir(reader: FileSystemDirectoryReader): Promise<FileSystemEntry[]> {
@@ -211,9 +236,10 @@ export function useFolderImport() {
       try {
         const { files, rootName } = await collectDropped(e.dataTransfer);
         const supported = files.filter(({ path }) => SUPPORTED.test(path));
+        const skipped = files.filter(({ path }) => !SUPPORTED.test(path));
         if (!supported.length) {
           setError(
-            "No supported files found. Try HTML, CSS, JS, JSX, TS, or TSX (or a folder of them).",
+            "No supported files found. Try HTML, CSS, JS, JSX, TS, TSX, or images.",
           );
           return;
         }
@@ -223,11 +249,32 @@ export function useFolderImport() {
           );
           return;
         }
+        if (skipped.length) {
+          console.warn(
+            `Skipped ${skipped.length} unsupported file(s):`,
+            skipped.map((s) => s.path),
+          );
+        }
 
         const artifactFiles: ArtifactFile[] = [];
         for (const { path, file } of supported) {
-          const content = await file.text();
-          artifactFiles.push({ name: path, type: detectType(path), content });
+          if (BINARY.test(path)) {
+            const content = await fileToBase64(file);
+            artifactFiles.push({
+              name: path,
+              type: detectType(path),
+              content,
+              encoding: "base64",
+            });
+          } else {
+            const content = await file.text();
+            artifactFiles.push({
+              name: path,
+              type: detectType(path),
+              content,
+              encoding: "utf8",
+            });
+          }
         }
 
         const title = rootName ?? "Untitled";

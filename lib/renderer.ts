@@ -1,9 +1,12 @@
 export type ArtifactKind = "html" | "jsx";
 
+export type ArtifactEncoding = "utf8" | "base64";
+
 export type ArtifactFile = {
   name: string;
   content: string;
   type: string;
+  encoding?: ArtifactEncoding;
 };
 
 export type Artifact = {
@@ -19,10 +22,19 @@ const isCss = (n: string) => /\.css$/i.test(n);
 const isJs = (n: string) => /\.m?js$/i.test(n) && !/\.jsx?$/i.test(n);
 const isJsx = (n: string) => /\.(jsx|tsx)$/i.test(n);
 const isReactSource = (n: string) => /\.(jsx|tsx|js|ts)$/i.test(n);
+const isImagePath = (n: string) =>
+  /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp)$/i.test(n);
+
+function stripQueryHash(p: string): string {
+  return p.replace(/[?#].*$/, "");
+}
 
 function matchFile(files: ArtifactFile[], wanted: string): ArtifactFile | undefined {
-  const target = wanted.replace(/^\.?\/+/, "");
-  return files.find((f) => f.name === target || f.name === wanted);
+  const cleaned = stripQueryHash(wanted);
+  const target = cleaned.replace(/^\.?\/+/, "");
+  return files.find(
+    (f) => f.name === target || f.name === cleaned || f.name === wanted,
+  );
 }
 
 function escapeAttr(s: string): string {
@@ -33,20 +45,42 @@ function escapeAttr(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function dataUrlFor(file: ArtifactFile): string {
+  const mime = file.type || "application/octet-stream";
+  if (file.encoding === "base64") {
+    return `data:${mime};base64,${file.content}`;
+  }
+  return `data:${mime};charset=utf-8,${encodeURIComponent(file.content)}`;
+}
+
+function inlineCssUrls(css: string, files: ArtifactFile[]): string {
+  return css.replace(
+    /url\(\s*(["']?)([^"')]+)\1\s*\)/gi,
+    (match, _q, raw: string) => {
+      if (/^(?:https?:|data:|#|\/\/)/i.test(raw)) return match;
+      const file = matchFile(files, raw);
+      if (!file) return match;
+      return `url("${dataUrlFor(file)}")`;
+    },
+  );
+}
+
 function inlineLinks(
   html: string,
   files: ArtifactFile[],
   visited: Set<string> = new Set(),
 ): string {
   let out = html.replace(
-    /<link\b[^>]*?href=["']([^"']+\.css)["'][^>]*?>/gi,
+    /<link\b[^>]*?href=["']([^"']+?\.css(?:[?#][^"']*)?)["'][^>]*?>/gi,
     (match, href) => {
       const file = matchFile(files, href);
-      return file ? `<style>\n${file.content}\n</style>` : match;
+      return file
+        ? `<style>\n${inlineCssUrls(file.content, files)}\n</style>`
+        : match;
     },
   );
   out = out.replace(
-    /<script\b([^>]*?)\bsrc=["']([^"']+\.m?js)["']([^>]*)><\/script>/gi,
+    /<script\b([^>]*?)\bsrc=["']([^"']+?\.m?js(?:[?#][^"']*)?)["']([^>]*)><\/script>/gi,
     (match, _pre, src) => {
       const file = matchFile(files, src);
       return file ? `<script>\n${file.content}\n<\/script>` : match;
@@ -56,7 +90,7 @@ function inlineLinks(
   // embeds <iframe src="hmi.html">) renders correctly inside srcdoc, where
   // relative URLs can't resolve.
   out = out.replace(
-    /<iframe\b([^>]*?)\bsrc=["']([^"']+\.html?)["']([^>]*)>/gi,
+    /<iframe\b([^>]*?)\bsrc=["']([^"']+?\.html?(?:[?#][^"']*)?)["']([^>]*)>/gi,
     (match, pre: string, src: string, post: string) => {
       const file = matchFile(files, src);
       if (!file) return match;
@@ -65,6 +99,35 @@ function inlineLinks(
       const nestedVisited = new Set(visited).add(key);
       const inner = inlineLinks(file.content, files, nestedVisited);
       return `<iframe${pre}srcdoc="${escapeAttr(inner)}"${post}>`;
+    },
+  );
+  // Inline <img>, <source>, and <link rel="icon"> references to bundled image
+  // files as data: URLs. Without this, the iframe srcdoc resolves the relative
+  // src against the parent page and gets a 404.
+  out = out.replace(
+    /<img\b([^>]*?)\bsrc=["']([^"']+)["']([^>]*)>/gi,
+    (match, pre: string, src: string, post: string) => {
+      if (!isImagePath(stripQueryHash(src))) return match;
+      const file = matchFile(files, src);
+      if (!file) return match;
+      return `<img${pre}src="${dataUrlFor(file)}"${post}>`;
+    },
+  );
+  out = out.replace(
+    /<source\b([^>]*?)\bsrc=["']([^"']+)["']([^>]*)>/gi,
+    (match, pre: string, src: string, post: string) => {
+      if (!isImagePath(stripQueryHash(src))) return match;
+      const file = matchFile(files, src);
+      if (!file) return match;
+      return `<source${pre}src="${dataUrlFor(file)}"${post}>`;
+    },
+  );
+  out = out.replace(
+    /<link\b([^>]*?\brel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]*?)\bhref=["']([^"']+)["']([^>]*)>/gi,
+    (match, pre: string, href: string, post: string) => {
+      const file = matchFile(files, href);
+      if (!file) return match;
+      return `<link${pre}href="${dataUrlFor(file)}"${post}>`;
     },
   );
   return out;
