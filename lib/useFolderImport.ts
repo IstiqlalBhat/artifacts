@@ -63,25 +63,27 @@ async function collectDropped(dt: DataTransfer): Promise<{
   files: Array<{ path: string; file: File }>;
   rootName: string | null;
 }> {
+  // DataTransfer goes stale the moment we await, so snapshot everything
+  // we'll need from it (entries AND files) synchronously up front.
   const items = Array.from(dt.items).filter((i) => i.kind === "file");
-  const supportsEntries = items.some(
-    (i) => typeof i.webkitGetAsEntry === "function",
-  );
+  const entries: FileSystemEntry[] = [];
+  for (const item of items) {
+    const entry = item.webkitGetAsEntry?.();
+    if (entry) entries.push(entry);
+  }
+  const fallbackFiles = Array.from(dt.files);
 
-  if (supportsEntries) {
+  if (entries.length) {
     const collected: Array<{ path: string; file: File }> = [];
-    let onlyDir: FileSystemDirectoryEntry | null = null;
-    let topLevelCount = 0;
-
-    for (const item of items) {
-      const entry = item.webkitGetAsEntry?.();
-      if (!entry) continue;
-      topLevelCount += 1;
-      if (entry.isDirectory) onlyDir = entry as FileSystemDirectoryEntry;
+    for (const entry of entries) {
       collected.push(...(await walk(entry, "")));
     }
 
-    if (topLevelCount === 1 && onlyDir) {
+    const onlyDir =
+      entries.length === 1 && entries[0].isDirectory
+        ? (entries[0] as FileSystemDirectoryEntry)
+        : null;
+    if (onlyDir) {
       const prefix = `${onlyDir.name}/`;
       for (const c of collected) {
         if (c.path.startsWith(prefix)) c.path = c.path.slice(prefix.length);
@@ -92,7 +94,7 @@ async function collectDropped(dt: DataTransfer): Promise<{
   }
 
   return {
-    files: Array.from(dt.files).map((file) => ({ path: file.name, file })),
+    files: fallbackFiles.map((file) => ({ path: file.name, file })),
     rootName: null,
   };
 }
