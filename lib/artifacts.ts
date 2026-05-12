@@ -1,0 +1,138 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { nanoid } from "nanoid";
+import { createClient } from "@/lib/supabase/server";
+import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
+
+async function getShareToken(id: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("artifacts")
+    .select("share_token")
+    .eq("id", id)
+    .maybeSingle();
+  return (data?.share_token as string | null) ?? null;
+}
+
+function bustShares(tokens: Array<string | null>) {
+  const seen = new Set<string>();
+  for (const t of tokens) {
+    if (t && !seen.has(t)) {
+      seen.add(t);
+      revalidatePath(`/s/${t}`);
+    }
+  }
+}
+
+export async function createArtifact(input: {
+  title: string;
+  kind: ArtifactKind;
+  files: ArtifactFile[];
+  entry: string | null;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Not signed in" };
+  }
+
+  if (!input.files.length) {
+    return { error: "Add at least one file" };
+  }
+
+  const { data, error } = await supabase
+    .from("artifacts")
+    .insert({
+      owner: user.id,
+      title: input.title.trim() || "Untitled",
+      kind: input.kind,
+      files: input.files,
+      entry: input.entry,
+    })
+    .select("id")
+    .single();
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return { id: data.id };
+}
+
+export async function updateArtifact(
+  id: string,
+  patch: {
+    title?: string;
+    files?: ArtifactFile[];
+    entry?: string | null;
+    kind?: ArtifactKind;
+  },
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in" };
+
+  const existingToken = await getShareToken(id);
+
+  const { error } = await supabase
+    .from("artifacts")
+    .update(patch)
+    .eq("id", id)
+    .eq("owner", user.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/a/${id}`);
+  bustShares([existingToken]);
+  return { ok: true };
+}
+
+export async function toggleShare(id: string, share: boolean) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in" };
+
+  const existingToken = await getShareToken(id);
+  const share_token = share ? nanoid(12) : null;
+
+  const { error } = await supabase
+    .from("artifacts")
+    .update({ share_token })
+    .eq("id", id)
+    .eq("owner", user.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/a/${id}`);
+  bustShares([existingToken, share_token]);
+  return { share_token };
+}
+
+export async function deleteArtifact(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const existingToken = await getShareToken(id);
+
+  await supabase
+    .from("artifacts")
+    .delete()
+    .eq("id", id)
+    .eq("owner", user.id);
+
+  revalidatePath("/dashboard");
+  bustShares([existingToken]);
+  redirect("/dashboard");
+}
