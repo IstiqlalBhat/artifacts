@@ -25,7 +25,19 @@ function matchFile(files: ArtifactFile[], wanted: string): ArtifactFile | undefi
   return files.find((f) => f.name === target || f.name === wanted);
 }
 
-function inlineLinks(html: string, files: ArtifactFile[]): string {
+function escapeAttr(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function inlineLinks(
+  html: string,
+  files: ArtifactFile[],
+  visited: Set<string> = new Set(),
+): string {
   let out = html.replace(
     /<link\b[^>]*?href=["']([^"']+\.css)["'][^>]*?>/gi,
     (match, href) => {
@@ -38,6 +50,21 @@ function inlineLinks(html: string, files: ArtifactFile[]): string {
     (match, _pre, src) => {
       const file = matchFile(files, src);
       return file ? `<script>\n${file.content}\n<\/script>` : match;
+    },
+  );
+  // Inline nested HTML iframes so a folder of pages (e.g. an outer page that
+  // embeds <iframe src="hmi.html">) renders correctly inside srcdoc, where
+  // relative URLs can't resolve.
+  out = out.replace(
+    /<iframe\b([^>]*?)\bsrc=["']([^"']+\.html?)["']([^>]*)>/gi,
+    (match, pre: string, src: string, post: string) => {
+      const file = matchFile(files, src);
+      if (!file) return match;
+      const key = file.name;
+      if (visited.has(key)) return match;
+      const nestedVisited = new Set(visited).add(key);
+      const inner = inlineLinks(file.content, files, nestedVisited);
+      return `<iframe${pre}srcdoc="${escapeAttr(inner)}"${post}>`;
     },
   );
   return out;
