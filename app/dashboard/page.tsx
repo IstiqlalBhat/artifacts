@@ -9,6 +9,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Header } from "@/components/Header";
+import { DashboardDropZone } from "@/components/DashboardDropZone";
 import { buttonStyles } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
@@ -45,57 +46,61 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
-              <Library className="h-4 w-4" />
-              Library
-            </p>
-            <h1 className="text-3xl font-semibold sm:text-4xl">
-              Your artifacts
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Review drafts, reopen a workbench, or copy a shareable prototype.
-            </p>
-          </div>
-          <Link href="/new" className={buttonStyles({ size: "lg" })}>
-            <Plus className="h-4 w-4" />
-            New artifact
-          </Link>
-        </div>
-
-        <div className="mb-8 grid border-y border-border sm:grid-cols-3">
-          <Stat label="Artifacts" value={artifacts.length.toString()} />
-          <Stat label="Files stored" value={fileCount.toString()} />
-          <Stat label="Public links" value={sharedCount.toString()} />
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error.message}. Run the SQL migration in{" "}
-            <code className="code-font">supabase/migrations/</code>.
-          </div>
-        )}
-
-        {artifacts.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm shadow-primary/5">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_9rem_9rem_7rem]">
-              <span>Artifact</span>
-              <span className="hidden sm:block">Updated</span>
-              <span className="hidden sm:block">Sharing</span>
-              <span className="text-right">Open</span>
+      <DashboardDropZone>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
+          <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
+                <Library className="h-4 w-4" />
+                Library
+              </p>
+              <h1 className="text-3xl font-semibold sm:text-4xl">
+                Your artifacts
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                Review drafts, reopen a workbench, or copy a shareable prototype.
+                Drop a folder anywhere on this page to import it as a new
+                artifact.
+              </p>
             </div>
-            <div className="divide-y divide-border">
-              {artifacts.map((artifact) => (
-                <ArtifactRow key={artifact.id} artifact={artifact} />
-              ))}
-            </div>
+            <Link href="/new" className={buttonStyles({ size: "lg" })}>
+              <Plus className="h-4 w-4" />
+              New artifact
+            </Link>
           </div>
-        )}
-      </main>
+
+          <div className="mb-8 grid border-y border-border sm:grid-cols-3">
+            <Stat label="Artifacts" value={artifacts.length.toString()} />
+            <Stat label="Files stored" value={fileCount.toString()} />
+            <Stat label="Public links" value={sharedCount.toString()} />
+          </div>
+
+          {error && (
+            <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error.message}. Run the SQL migration in{" "}
+              <code className="code-font">supabase/migrations/</code>.
+            </div>
+          )}
+
+          {artifacts.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm shadow-primary/5">
+              <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_9rem_9rem_7rem]">
+                <span>Artifact</span>
+                <span className="hidden sm:block">Updated</span>
+                <span className="hidden sm:block">Sharing</span>
+                <span className="text-right">Open</span>
+              </div>
+              <div className="divide-y divide-border">
+                {artifacts.map((artifact) => (
+                  <ArtifactRow key={artifact.id} artifact={artifact} />
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+      </DashboardDropZone>
     </div>
   );
 }
