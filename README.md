@@ -42,6 +42,13 @@ and run. Creates the `artifacts` table + RLS policies.
 is instant. Keep it on if you want verification; then add
 `http://localhost:3000/auth/callback` to **URL Configuration → Redirect URLs**.
 
+### 4b. Branded email templates (optional)
+
+Paste the HTML from [`supabase/templates/`](./supabase/templates/) into
+**Authentication → Email Templates**. See
+[`supabase/templates/README.md`](./supabase/templates/README.md) for the
+file-to-slot mapping.
+
 ### 5. Dev server
 
 ```bash

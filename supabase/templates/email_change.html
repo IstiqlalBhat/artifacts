@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Confirm your new email</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;font-size:0;color:transparent;line-height:0;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+    Confirm the new email address for your Artifacts account.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f5f7;">
+    <tr>
+      <td align="center" style="padding:48px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#ffffff;border:1px solid #e7e7ea;border-radius:14px;overflow:hidden;">
+
+          <tr>
+            <td style="padding:28px 32px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="32" height="32" align="center" valign="middle" style="background:#0b0f13;border-radius:8px;">
+                    <span style="display:inline-block;color:#83f3df;font-weight:700;font-size:15px;letter-spacing:-0.04em;line-height:32px;">A</span>
+                  </td>
+                  <td style="padding-left:10px;font-weight:600;font-size:15px;letter-spacing:-0.01em;color:#0b0f13;">Artifacts</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:28px 32px 8px;">
+              <h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-0.02em;color:#0b0f13;">
+                Confirm your new email
+              </h1>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#3a3e44;">
+                You asked to change the email on your Artifacts account.
+              </p>
+
+              <!-- From / to summary -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;border:1px solid #ececef;border-radius:10px;background:#fafafb;">
+                <tr>
+                  <td style="padding:14px 16px;font-size:13px;color:#7a7f86;border-bottom:1px solid #ececef;">
+                    From
+                    <span style="display:block;margin-top:4px;font-size:14px;color:#0b0f13;font-weight:500;word-break:break-all;">{{ .Email }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 16px;font-size:13px;color:#7a7f86;">
+                    To
+                    <span style="display:block;margin-top:4px;font-size:14px;color:#0b0f13;font-weight:500;word-break:break-all;">{{ .NewEmail }}</span>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="border-radius:10px;background:#0b0f13;">
+                    <a href="{{ .ConfirmationURL }}"
+                       target="_blank"
+                       style="display:inline-block;padding:13px 26px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;letter-spacing:-0.01em;">
+                      Confirm change →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:28px 0 0;font-size:13px;line-height:1.6;color:#7a7f86;">
+                Or paste this link into your browser:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#0d8c80;word-break:break-all;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <tr><td style="padding:24px 32px 0;"></td></tr>
+
+          <tr>
+            <td style="padding:20px 32px;border-top:1px solid #ececef;background:#fafafb;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#8a8f96;">
+                If you didn't request this change, ignore this email — your
+                current email stays in place. You may also want to reset
+                your password.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#a8acb3;letter-spacing:0.02em;">
+          Sent by Artifacts · Sandboxed code, shared instantly
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

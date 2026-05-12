@@ -1,0 +1,15 @@
+{
+  "mailer_subjects_confirmation": "Confirm your Artifacts account",
+  "mailer_subjects_magic_link": "Sign in to Artifacts",
+  "mailer_subjects_recovery": "Reset your Artifacts password",
+  "mailer_subjects_invite": "You have been invited to Artifacts",
+  "mailer_subjects_email_change": "Confirm your new email address",
+  "mailer_subjects_reauthentication": "Confirm this Artifacts action",
+  "mailer_subjects_password_changed_notification": "Your Artifacts password was changed",
+  "mailer_subjects_email_changed_notification": "Your Artifacts email address was changed",
+  "mailer_subjects_phone_changed_notification": "Your Artifacts phone number was changed",
+  "mailer_subjects_identity_linked_notification": "A new sign-in identity was linked",
+  "mailer_subjects_identity_unlinked_notification": "A sign-in identity was unlinked",
+  "mailer_subjects_mfa_factor_enrolled_notification": "A new MFA method was added",
+  "mailer_subjects_mfa_factor_unenrolled_notification": "An MFA method was removed"
+}
