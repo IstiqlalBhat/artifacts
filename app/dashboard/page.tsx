@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { DashboardDropZone } from "@/components/DashboardDropZone";
+import { DeleteArtifactButton } from "@/components/DeleteArtifactButton";
 import { buttonStyles } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
@@ -86,10 +87,11 @@ export default async function DashboardPage() {
             <EmptyState />
           ) : (
             <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm shadow-primary/5">
-              <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_9rem_9rem_7rem]">
+              <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_9rem_9rem_4rem_4rem]">
                 <span>Artifact</span>
                 <span className="hidden sm:block">Updated</span>
                 <span className="hidden sm:block">Sharing</span>
+                <span className="hidden text-center sm:block">Delete</span>
                 <span className="text-right">Open</span>
               </div>
               <div className="divide-y divide-border">
@@ -119,10 +121,7 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
   const more = artifact.files.length - fileNames.length;
 
   return (
-    <Link
-      href={`/a/${artifact.id}`}
-      className="group grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_9rem_9rem_7rem]"
-    >
+    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_9rem_9rem_4rem_4rem]">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-background text-accent">
           <FileCode2 className="h-5 w-5" />
@@ -154,10 +153,18 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
           </span>
         )}
       </span>
+      <span className="hidden justify-center sm:flex">
+        <DeleteArtifactButton id={artifact.id} title={artifact.title} />
+      </span>
       <span className="flex justify-end text-muted-foreground transition-colors group-hover:text-foreground">
         <ArrowRight className="h-4 w-4" />
       </span>
-    </Link>
+      <Link
+        href={`/a/${artifact.id}`}
+        aria-label={`Open ${artifact.title}`}
+        className="absolute inset-0"
+      />
+    </div>
   );
 }
 
