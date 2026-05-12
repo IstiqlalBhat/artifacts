@@ -1,8 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Check, Trash2, X } from "lucide-react";
 import { deleteArtifact } from "@/lib/artifacts";
+
+function ConfirmDeleteButton({ title }: { title: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-label={`Confirm delete ${title}`}
+      aria-disabled={pending}
+      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-destructive/10"
+    >
+      <Check className="h-4 w-4" />
+    </button>
+  );
+}
 
 export function DeleteArtifactButton({
   id,
@@ -21,13 +37,7 @@ export function DeleteArtifactButton({
       >
         <form action={deleteArtifact}>
           <input type="hidden" name="id" value={id} />
-          <button
-            type="submit"
-            aria-label={`Confirm delete ${title}`}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
-          >
-            <Check className="h-4 w-4" />
-          </button>
+          <ConfirmDeleteButton title={title} />
         </form>
         <button
           type="button"
