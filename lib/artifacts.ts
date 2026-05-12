@@ -8,8 +8,15 @@ import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
 
 const MAX_BUNDLE_BYTES = 6 * 1024 * 1024;
 
+function fileByteSize(f: ArtifactFile): number {
+  if (!f.content) return 0;
+  return f.encoding === "base64"
+    ? Buffer.from(f.content, "base64").length
+    : Buffer.byteLength(f.content, "utf8");
+}
+
 function bundleTooBig(files: ArtifactFile[]): string | null {
-  const total = files.reduce((sum, f) => sum + (f.content?.length ?? 0), 0);
+  const total = files.reduce((sum, f) => sum + fileByteSize(f), 0);
   if (total > MAX_BUNDLE_BYTES) {
     const mb = (total / 1024 / 1024).toFixed(1);
     const limit = (MAX_BUNDLE_BYTES / 1024 / 1024).toFixed(0);
