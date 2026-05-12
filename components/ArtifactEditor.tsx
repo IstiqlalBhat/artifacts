@@ -36,7 +36,23 @@ type Props = {
   };
 };
 
-const ACCEPTED = ".html,.htm,.css,.js,.mjs,.jsx,.ts,.tsx";
+const ACCEPTED =
+  ".html,.htm,.css,.js,.mjs,.jsx,.ts,.tsx,.json,.png,.jpg,.jpeg,.gif,.webp,.avif,.svg,.ico,.bmp";
+const BINARY_RE = /\.(png|jpe?g|gif|webp|avif|ico|bmp)$/i;
+
+async function fileToBase64(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + CHUNK) as unknown as number[],
+    );
+  }
+  return btoa(binary);
+}
 
 const STARTER_HTML: ArtifactFile = {
   name: "index.html",
@@ -136,6 +152,15 @@ function detectType(name: string): string {
   if (/\.m?js$/i.test(name)) return "text/javascript";
   if (/\.tsx?$/i.test(name)) return "text/typescript";
   if (/\.jsx$/i.test(name)) return "text/jsx";
+  if (/\.json$/i.test(name)) return "application/json";
+  if (/\.svg$/i.test(name)) return "image/svg+xml";
+  if (/\.png$/i.test(name)) return "image/png";
+  if (/\.jpe?g$/i.test(name)) return "image/jpeg";
+  if (/\.gif$/i.test(name)) return "image/gif";
+  if (/\.webp$/i.test(name)) return "image/webp";
+  if (/\.avif$/i.test(name)) return "image/avif";
+  if (/\.ico$/i.test(name)) return "image/x-icon";
+  if (/\.bmp$/i.test(name)) return "image/bmp";
   return "text/plain";
 }
 
@@ -186,12 +211,23 @@ export function ArtifactEditor({ mode, initial }: Props) {
     async (list: FileList | File[]) => {
       const items = Array.from(list);
       for (const f of items) {
-        const content = await f.text();
-        addOrReplaceFile({
-          name: f.name,
-          type: f.type || detectType(f.name),
-          content,
-        });
+        if (BINARY_RE.test(f.name)) {
+          const content = await fileToBase64(f);
+          addOrReplaceFile({
+            name: f.name,
+            type: f.type || detectType(f.name),
+            content,
+            encoding: "base64",
+          });
+        } else {
+          const content = await f.text();
+          addOrReplaceFile({
+            name: f.name,
+            type: f.type || detectType(f.name),
+            content,
+            encoding: "utf8",
+          });
+        }
       }
     },
     [addOrReplaceFile],

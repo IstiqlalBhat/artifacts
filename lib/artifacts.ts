@@ -6,6 +6,25 @@ import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
 import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
 
+const MAX_BUNDLE_BYTES = 6 * 1024 * 1024;
+
+function fileByteSize(f: ArtifactFile): number {
+  if (!f.content) return 0;
+  return f.encoding === "base64"
+    ? Buffer.from(f.content, "base64").length
+    : Buffer.byteLength(f.content, "utf8");
+}
+
+function bundleTooBig(files: ArtifactFile[]): string | null {
+  const total = files.reduce((sum, f) => sum + fileByteSize(f), 0);
+  if (total > MAX_BUNDLE_BYTES) {
+    const mb = (total / 1024 / 1024).toFixed(1);
+    const limit = (MAX_BUNDLE_BYTES / 1024 / 1024).toFixed(0);
+    return `Artifact is ${mb} MB. Limit is ${limit} MB — compress images or remove files.`;
+  }
+  return null;
+}
+
 async function getShareToken(id: string): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -44,6 +63,9 @@ export async function createArtifact(input: {
     return { error: "Add at least one file" };
   }
 
+  const sizeError = bundleTooBig(input.files);
+  if (sizeError) return { error: sizeError };
+
   const { data, error } = await supabase
     .from("artifacts")
     .insert({
@@ -76,6 +98,11 @@ export async function updateArtifact(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not signed in" };
+
+  if (patch.files) {
+    const sizeError = bundleTooBig(patch.files);
+    if (sizeError) return { error: sizeError };
+  }
 
   const existingToken = await getShareToken(id);
 
