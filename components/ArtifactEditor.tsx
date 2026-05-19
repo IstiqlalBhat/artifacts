@@ -10,6 +10,7 @@ import {
   Code2,
   Sparkles,
   FileCode2,
+  Globe2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,9 +31,11 @@ type Props = {
   initial?: {
     id: string;
     title: string;
+    description: string | null;
     kind: ArtifactKind;
     files: ArtifactFile[];
     entry: string | null;
+    inDirectory: boolean;
   };
 };
 
@@ -167,6 +170,8 @@ function detectType(name: string): string {
 export function ArtifactEditor({ mode, initial }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "Untitled");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [inDirectory, setInDirectory] = useState(initial?.inDirectory ?? false);
   const [files, setFiles] = useState<ArtifactFile[]>(
     initial?.files ?? [STARTER_HTML, STARTER_CSS, STARTER_JS],
   );
@@ -280,15 +285,31 @@ export function ArtifactEditor({ mode, initial }: Props) {
     });
   };
 
+  const trimmedTitle = title.trim();
+  const trimmedDescription = description.trim();
+  const titleMissing =
+    mode === "new" && (trimmedTitle === "" || trimmedTitle === "Untitled");
+  const descriptionMissing = mode === "new" && trimmedDescription === "";
+  const saveDisabled = pending || titleMissing || descriptionMissing;
+
+  const validationHint = titleMissing
+    ? "Set a title before saving."
+    : descriptionMissing
+      ? "Add a description before saving."
+      : null;
+
   const onSave = () => {
     setErrorMsg(null);
+    if (titleMissing || descriptionMissing) return;
     startTransition(async () => {
       if (mode === "new") {
         const res = await createArtifact({
           title,
+          description,
           kind,
           files,
           entry,
+          inDirectory,
         });
         if ("error" in res && res.error) {
           setErrorMsg(res.error);
@@ -300,9 +321,11 @@ export function ArtifactEditor({ mode, initial }: Props) {
       } else if (initial) {
         const res = await updateArtifact(initial.id, {
           title,
+          description,
           files,
           entry,
           kind,
+          inDirectory,
         });
         if ("error" in res && res.error) {
           setErrorMsg(res.error);
@@ -325,17 +348,33 @@ export function ArtifactEditor({ mode, initial }: Props) {
     >
       <div className="border-b border-border bg-card/95 px-3 py-3 shadow-sm shadow-primary/5">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex min-w-[14rem] flex-1 items-center gap-2">
+          <div className="flex min-w-[14rem] flex-1 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title"
+                className="h-9 max-w-md border-0 bg-muted/60 text-base font-semibold shadow-none focus-visible:ring-1"
+              />
+              <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">
+                {files.length} file{files.length === 1 ? "" : "s"} /{" "}
+                {kind === "jsx" ? "React" : "HTML"}
+              </span>
+            </div>
             <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title"
-              className="h-9 max-w-md border-0 bg-muted/60 text-base font-semibold shadow-none focus-visible:ring-1"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={
+                mode === "new"
+                  ? "Description (required) — shown on the dashboard and in the directory"
+                  : "Description — shown on the dashboard and in the directory"
+              }
+              aria-required={mode === "new"}
+              className={cn(
+                "h-8 max-w-2xl border-0 bg-muted/30 text-xs shadow-none focus-visible:ring-1",
+                descriptionMissing && "ring-1 ring-destructive/40",
+              )}
             />
-            <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">
-              {files.length} file{files.length === 1 ? "" : "s"} /{" "}
-              {kind === "jsx" ? "React" : "HTML"}
-            </span>
           </div>
 
           <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5 text-xs shadow-sm shadow-primary/5">
@@ -388,6 +427,25 @@ export function ArtifactEditor({ mode, initial }: Props) {
                 {errorMsg}
               </span>
             )}
+            {!errorMsg && validationHint && (
+              <span className="hidden max-w-64 truncate text-xs text-muted-foreground sm:inline">
+                {validationHint}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setInDirectory((v) => !v)}
+              aria-pressed={inDirectory}
+              className={cn(
+                "inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors",
+                inDirectory
+                  ? "border-accent/40 bg-accent/10 text-accent"
+                  : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <Globe2 className="h-3.5 w-3.5" />
+              {inDirectory ? "In directory" : "Share to directory"}
+            </button>
             <label className="cursor-pointer">
               <input
                 type="file"
@@ -413,7 +471,12 @@ export function ArtifactEditor({ mode, initial }: Props) {
               <Sparkles className="h-3.5 w-3.5" />
               JSX starter
             </Button>
-            <Button size="sm" onClick={onSave} disabled={pending}>
+            <Button
+              size="sm"
+              onClick={onSave}
+              disabled={saveDisabled}
+              title={validationHint ?? undefined}
+            >
               <Save className="h-3.5 w-3.5" />
               {pending ? "Saving..." : mode === "new" ? "Save" : "Save changes"}
             </Button>

@@ -50,6 +50,8 @@ export async function createArtifact(input: {
   kind: ArtifactKind;
   files: ArtifactFile[];
   entry: string | null;
+  description?: string | null;
+  inDirectory?: boolean;
 }) {
   const supabase = await createClient();
   const {
@@ -70,10 +72,13 @@ export async function createArtifact(input: {
     .from("artifacts")
     .insert({
       owner: user.id,
+      owner_email: user.email ?? null,
       title: input.title.trim() || "Untitled",
       kind: input.kind,
       files: input.files,
       entry: input.entry,
+      description: input.description?.trim() || null,
+      in_directory: input.inDirectory ?? false,
     })
     .select("id")
     .single();
@@ -81,6 +86,7 @@ export async function createArtifact(input: {
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
+  if (input.inDirectory) revalidatePath("/directory");
   return { id: data.id };
 }
 
@@ -91,6 +97,8 @@ export async function updateArtifact(
     files?: ArtifactFile[];
     entry?: string | null;
     kind?: ArtifactKind;
+    description?: string | null;
+    inDirectory?: boolean;
   },
 ) {
   const supabase = await createClient();
@@ -104,19 +112,49 @@ export async function updateArtifact(
     if (sizeError) return { error: sizeError };
   }
 
+  const normalized = { ...patch } as Record<string, unknown>;
+  if (Object.prototype.hasOwnProperty.call(patch, "description")) {
+    normalized.description = patch.description?.trim() || null;
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "inDirectory")) {
+    normalized.in_directory = patch.inDirectory;
+    delete normalized.inDirectory;
+  }
+
   const existingToken = await getShareToken(id);
 
   const { error } = await supabase
     .from("artifacts")
-    .update(patch)
+    .update(normalized)
     .eq("id", id)
     .eq("owner", user.id);
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
+  revalidatePath("/directory");
   revalidatePath(`/a/${id}`);
+  revalidatePath(`/d/${id}`);
   bustShares([existingToken]);
   return { ok: true };
+}
+
+export async function toggleDirectory(id: string, inDirectory: boolean) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in" };
+
+  const { error } = await supabase
+    .from("artifacts")
+    .update({ in_directory: inDirectory })
+    .eq("id", id)
+    .eq("owner", user.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/directory");
+  return { in_directory: inDirectory };
 }
 
 export async function toggleShare(id: string, share: boolean) {
@@ -137,6 +175,7 @@ export async function toggleShare(id: string, share: boolean) {
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
+  revalidatePath("/directory");
   revalidatePath(`/a/${id}`);
   bustShares([existingToken, share_token]);
   return { share_token };
@@ -160,6 +199,7 @@ export async function deleteArtifact(formData: FormData) {
     .eq("owner", user.id);
 
   revalidatePath("/dashboard");
+  revalidatePath("/directory");
   bustShares([existingToken]);
   redirect("/dashboard");
 }

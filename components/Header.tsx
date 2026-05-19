@@ -20,12 +20,20 @@ export async function Header() {
           <span className="text-sm">Artifacts</span>
         </Link>
         {user && (
-          <Link
-            href="/dashboard"
-            className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
-          >
-            Library
-          </Link>
+          <>
+            <Link
+              href="/dashboard"
+              className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+            >
+              Library
+            </Link>
+            <Link
+              href="/directory"
+              className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+            >
+              Directory
+            </Link>
+          </>
         )}
         <div className="ml-auto flex items-center gap-2">
           {user ? (
