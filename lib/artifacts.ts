@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
 
 const MAX_BUNDLE_BYTES = 6 * 1024 * 1024;
+const MAX_DESCRIPTION_CHARS = 1000;
 
 function fileByteSize(f: ArtifactFile): number {
   if (!f.content) return 0;
@@ -61,6 +62,21 @@ export async function createArtifact(input: {
     return { error: "Not signed in" };
   }
 
+  const title = input.title.trim();
+  if (!title || title === "Untitled") {
+    return { error: "Title is required." };
+  }
+
+  const description = input.description?.trim() ?? "";
+  if (!description) {
+    return { error: "Description is required." };
+  }
+  if (description.length > MAX_DESCRIPTION_CHARS) {
+    return {
+      error: `Description must be ${MAX_DESCRIPTION_CHARS} characters or fewer.`,
+    };
+  }
+
   if (!input.files.length) {
     return { error: "Add at least one file" };
   }
@@ -72,12 +88,11 @@ export async function createArtifact(input: {
     .from("artifacts")
     .insert({
       owner: user.id,
-      owner_email: user.email ?? null,
-      title: input.title.trim() || "Untitled",
+      title,
       kind: input.kind,
       files: input.files,
       entry: input.entry,
-      description: input.description?.trim() || null,
+      description,
       in_directory: input.inDirectory ?? false,
     })
     .select("id")
@@ -114,7 +129,13 @@ export async function updateArtifact(
 
   const normalized = { ...patch } as Record<string, unknown>;
   if (Object.prototype.hasOwnProperty.call(patch, "description")) {
-    normalized.description = patch.description?.trim() || null;
+    const trimmed = patch.description?.trim() ?? "";
+    if (trimmed.length > MAX_DESCRIPTION_CHARS) {
+      return {
+        error: `Description must be ${MAX_DESCRIPTION_CHARS} characters or fewer.`,
+      };
+    }
+    normalized.description = trimmed || null;
   }
   if (Object.prototype.hasOwnProperty.call(patch, "inDirectory")) {
     normalized.in_directory = patch.inDirectory;

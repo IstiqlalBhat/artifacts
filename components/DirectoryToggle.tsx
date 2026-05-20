@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Globe2, Loader2 } from "lucide-react";
+import { AlertCircle, Globe2, Loader2 } from "lucide-react";
 import { toggleDirectory } from "@/lib/artifacts";
 import { cn } from "@/lib/utils";
 
@@ -16,13 +16,16 @@ export function DirectoryToggle({
 }) {
   const [checked, setChecked] = useState(initial);
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const onChange = (next: boolean) => {
+    setError(null);
     setChecked(next);
     startTransition(async () => {
       const res = await toggleDirectory(id, next);
       if ("error" in res && res.error) {
         setChecked(!next);
+        setError(res.error);
       }
     });
   };
@@ -38,20 +41,33 @@ export function DirectoryToggle({
         disabled={pending}
         onChange={(event) => onChange(event.target.checked)}
         aria-label={`${checked ? "Remove" : "Add"} ${title} ${checked ? "from" : "to"} the directory`}
+        aria-invalid={error ? true : undefined}
         className="h-4 w-4 cursor-pointer accent-accent disabled:cursor-not-allowed"
       />
       <span
         className={cn(
           "inline-flex items-center gap-1 font-medium transition-colors",
-          checked ? "text-accent" : "text-muted-foreground",
+          error
+            ? "text-destructive"
+            : checked
+              ? "text-accent"
+              : "text-muted-foreground",
         )}
       >
         {pending ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : error ? (
+          <AlertCircle className="h-3.5 w-3.5" />
         ) : (
           <Globe2 className="h-3.5 w-3.5" />
         )}
-        Directory
+        {error ? (
+          <span role="alert" title={error}>
+            Failed
+          </span>
+        ) : (
+          "Directory"
+        )}
       </span>
     </label>
   );
