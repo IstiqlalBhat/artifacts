@@ -13,6 +13,7 @@ const SUPPORTED =
   /\.(html?|css|m?js|jsx|tsx|ts|json|png|jpe?g|gif|webp|avif|svg|ico|bmp)$/i;
 const BINARY = /\.(png|jpe?g|gif|webp|avif|ico|bmp)$/i;
 const MAX_FILES = 80;
+const MAX_DESCRIPTION_CHARS = 1000;
 
 const baseName = (path: string) => path.split("/").pop() ?? path;
 const isRoot = (path: string) => !path.includes("/");
@@ -33,6 +34,40 @@ function detectType(name: string): string {
   if (/\.ico$/i.test(name)) return "image/x-icon";
   if (/\.bmp$/i.test(name)) return "image/bmp";
   return "text/plain";
+}
+
+function clampDescription(value: string): string {
+  if (value.length <= MAX_DESCRIPTION_CHARS) return value;
+  return `${value.slice(0, MAX_DESCRIPTION_CHARS - 3)}...`;
+}
+
+function buildImportTitle(rootName: string | null, files: ArtifactFile[]): string {
+  const trimmedRoot = rootName?.trim();
+  if (trimmedRoot && trimmedRoot !== "Untitled") return trimmedRoot;
+
+  if (files.length === 1) {
+    const name = baseName(files[0].name).replace(/\.[^.]+$/, "").trim();
+    if (name && name !== "Untitled") return name;
+  }
+
+  return "Imported artifact";
+}
+
+function buildImportDescription(
+  rootName: string | null,
+  files: ArtifactFile[],
+): string {
+  const shown = files
+    .slice(0, 5)
+    .map((file) => file.name)
+    .join(", ");
+  const more = files.length > 5 ? `, and ${files.length - 5} more` : "";
+  const source = rootName?.trim()
+    ? `folder "${rootName.trim()}"`
+    : "dropped files";
+  const count = `${files.length} supported file${files.length === 1 ? "" : "s"}`;
+
+  return clampDescription(`Imported from ${source} with ${count}: ${shown}${more}.`);
 }
 
 async function fileToBase64(file: File): Promise<string> {
@@ -159,6 +194,7 @@ function pickEntry(
 
 export type Pending = {
   title: string;
+  description: string;
   kind: ArtifactKind;
   files: ArtifactFile[];
   candidates: ArtifactFile[];
@@ -178,6 +214,7 @@ export function useFolderImport() {
   const save = useCallback(
     async (
       title: string,
+      description: string,
       kind: ArtifactKind,
       files: ArtifactFile[],
       entry: string | null,
@@ -185,7 +222,13 @@ export function useFolderImport() {
       setBusy(true);
       setError(null);
       try {
-        const res = await createArtifact({ title, kind, files, entry });
+        const res = await createArtifact({
+          title,
+          description,
+          kind,
+          files,
+          entry,
+        });
         if ("error" in res && res.error) {
           setError(res.error);
           return;
@@ -277,13 +320,15 @@ export function useFolderImport() {
           }
         }
 
-        const title = rootName ?? "Untitled";
+        const title = buildImportTitle(rootName, artifactFiles);
+        const description = buildImportDescription(rootName, artifactFiles);
         const kind = inferKind(artifactFiles);
         const decision = pickEntry(artifactFiles, kind);
 
         if (decision.ambiguous) {
           setPending({
             title,
+            description,
             kind,
             files: artifactFiles,
             candidates: decision.candidates,
@@ -292,7 +337,7 @@ export function useFolderImport() {
           return;
         }
 
-        await save(title, kind, artifactFiles, decision.entry);
+        await save(title, description, kind, artifactFiles, decision.entry);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Couldn't read those files.");
         setBusy(false);
@@ -304,7 +349,13 @@ export function useFolderImport() {
   const confirmEntry = useCallback(
     (entry: string | null) => {
       if (!pending) return;
-      void save(pending.title, pending.kind, pending.files, entry);
+      void save(
+        pending.title,
+        pending.description,
+        pending.kind,
+        pending.files,
+        entry,
+      );
     },
     [pending, save],
   );

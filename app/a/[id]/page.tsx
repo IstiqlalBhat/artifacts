@@ -17,7 +17,9 @@ export default async function ArtifactPage({ params }: { params: Params }) {
 
   const { data, error } = await supabase
     .from("artifacts")
-    .select("id, title, kind, files, entry, share_token, owner")
+    .select(
+      "id, title, description, kind, files, entry, share_token, in_directory, owner",
+    )
     .eq("id", id)
     .single();
 
@@ -37,9 +39,11 @@ export default async function ArtifactPage({ params }: { params: Params }) {
           initial={{
             id: data.id,
             title: data.title,
+            description: (data.description as string | null) ?? null,
             kind: data.kind as ArtifactKind,
             files: data.files as ArtifactFile[],
             entry: data.entry,
+            inDirectory: Boolean(data.in_directory),
           }}
         />
       </main>

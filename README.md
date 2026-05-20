@@ -30,11 +30,18 @@ cp .env.example .env.local
 # fill in the two values above
 ```
 
-### 3. Run the SQL migration
+### 3. Run the SQL migrations
 
-Supabase dashboard → **SQL Editor** → paste
-[`supabase/migrations/001_artifacts.sql`](./supabase/migrations/001_artifacts.sql)
-and run. Creates the `artifacts` table + RLS policies.
+Supabase dashboard → **SQL Editor** → paste and run each file in
+[`supabase/migrations/`](./supabase/migrations/) in numeric order:
+
+- [`001_artifacts.sql`](./supabase/migrations/001_artifacts.sql) — `artifacts`
+  table + RLS policies.
+- [`002_directory_and_description.sql`](./supabase/migrations/002_directory_and_description.sql)
+  — `description`, `in_directory`, `owner_email` columns, directory RLS
+  policy, and the `owner_email` trigger.
+
+All migrations are idempotent — safe to re-run.
 
 ### 4. Auth options (optional)
 

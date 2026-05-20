@@ -11,6 +11,7 @@ import {
 import { Header } from "@/components/Header";
 import { DashboardDropZone } from "@/components/DashboardDropZone";
 import { DeleteArtifactButton } from "@/components/DeleteArtifactButton";
+import { DirectoryToggle } from "@/components/DirectoryToggle";
 import { buttonStyles } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
@@ -22,6 +23,8 @@ type Row = {
   kind: "html" | "jsx";
   files: { name: string }[];
   share_token: string | null;
+  in_directory: boolean;
+  description: string | null;
   updated_at: string;
 };
 
@@ -34,11 +37,15 @@ export default async function DashboardPage() {
 
   const { data, error } = await supabase
     .from("artifacts")
-    .select("id, title, kind, files, share_token, updated_at")
+    .select(
+      "id, title, kind, files, share_token, in_directory, description, updated_at",
+    )
+    .eq("owner", user.id)
     .order("updated_at", { ascending: false });
 
   const artifacts = (data ?? []) as Row[];
   const sharedCount = artifacts.filter((artifact) => artifact.share_token).length;
+  const directoryCount = artifacts.filter((artifact) => artifact.in_directory).length;
   const fileCount = artifacts.reduce(
     (total, artifact) => total + artifact.files.length,
     0,
@@ -70,10 +77,11 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          <div className="mb-8 grid border-y border-border sm:grid-cols-3">
+          <div className="mb-8 grid border-y border-border sm:grid-cols-4">
             <Stat label="Artifacts" value={artifacts.length.toString()} />
             <Stat label="Files stored" value={fileCount.toString()} />
             <Stat label="Public links" value={sharedCount.toString()} />
+            <Stat label="In directory" value={directoryCount.toString()} />
           </div>
 
           {error && (
@@ -87,10 +95,11 @@ export default async function DashboardPage() {
             <EmptyState />
           ) : (
             <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm shadow-primary/5">
-              <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_9rem_9rem_4rem_4rem]">
+              <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_8rem_8rem_8rem_4rem_4rem]">
                 <span>Artifact</span>
                 <span className="hidden sm:block">Updated</span>
                 <span className="hidden sm:block">Sharing</span>
+                <span className="hidden sm:block">Directory</span>
                 <span className="hidden text-center sm:block">Delete</span>
                 <span className="text-right">Open</span>
               </div>
@@ -121,7 +130,7 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
   const more = artifact.files.length - fileNames.length;
 
   return (
-    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_9rem_9rem_4rem_4rem]">
+    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_8rem_8rem_8rem_4rem_4rem]">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-background text-accent">
           <FileCode2 className="h-5 w-5" />
@@ -130,6 +139,11 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
           <span className="block truncate font-medium group-hover:text-accent">
             {artifact.title}
           </span>
+          {artifact.description ? (
+            <span className="mt-1 block truncate text-xs text-muted-foreground">
+              {artifact.description}
+            </span>
+          ) : null}
           <span className="mt-1 block truncate code-font text-xs text-muted-foreground">
             {fileNames.join(" / ")}
             {more > 0 ? ` / +${more}` : ""}
@@ -152,6 +166,13 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
             Private
           </span>
         )}
+      </span>
+      <span className="hidden sm:block">
+        <DirectoryToggle
+          id={artifact.id}
+          initial={artifact.in_directory}
+          title={artifact.title}
+        />
       </span>
       <span className="hidden justify-center sm:flex">
         <DeleteArtifactButton id={artifact.id} title={artifact.title} />
