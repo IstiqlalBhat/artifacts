@@ -81,7 +81,7 @@ export default async function DashboardPage() {
             <Stat label="Artifacts" value={artifacts.length.toString()} />
             <Stat label="Files stored" value={fileCount.toString()} />
             <Stat label="Public links" value={sharedCount.toString()} />
-            <Stat label="In directory" value={directoryCount.toString()} />
+            <Stat label="In SVS Directory" value={directoryCount.toString()} />
           </div>
 
           {error && (

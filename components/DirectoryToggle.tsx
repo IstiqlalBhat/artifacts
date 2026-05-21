@@ -40,7 +40,7 @@ export function DirectoryToggle({
         checked={checked}
         disabled={pending}
         onChange={(event) => onChange(event.target.checked)}
-        aria-label={`${checked ? "Remove" : "Add"} ${title} ${checked ? "from" : "to"} the directory`}
+        aria-label={`${checked ? "Remove" : "Add"} ${title} ${checked ? "from" : "to"} the SVS Directory`}
         aria-invalid={error ? true : undefined}
         className="h-4 w-4 cursor-pointer accent-accent disabled:cursor-not-allowed"
       />

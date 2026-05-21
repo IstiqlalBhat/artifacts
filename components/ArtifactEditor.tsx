@@ -25,6 +25,7 @@ import {
   type ArtifactKind,
 } from "@/lib/renderer";
 import { createArtifact, updateArtifact } from "@/lib/artifacts";
+import { MIN_DESCRIPTION_CHARS } from "@/lib/validation";
 
 type NewInitial = {
   title?: string;
@@ -48,8 +49,6 @@ type EditInitial = {
 type Props =
   | { mode: "new"; initial?: NewInitial }
   | { mode: "edit"; initial: EditInitial };
-
-const MIN_DESCRIPTION_CHARS = 10;
 
 const ACCEPTED =
   ".html,.htm,.css,.js,.mjs,.jsx,.ts,.tsx,.json,.png,.jpg,.jpeg,.gif,.webp,.avif,.svg,.ico,.bmp";
@@ -301,7 +300,8 @@ export function ArtifactEditor(props: Props) {
 
   const trimmedTitle = title.trim();
   const trimmedDescription = description.trim();
-  const titleMissing = trimmedTitle === "" || trimmedTitle === "Untitled";
+  const titleMissing =
+    trimmedTitle === "" || (mode === "new" && trimmedTitle === "Untitled");
   const descriptionInvalid =
     trimmedDescription.length < MIN_DESCRIPTION_CHARS;
   const saveDisabled = pending || titleMissing || descriptionInvalid;
@@ -380,7 +380,7 @@ export function ArtifactEditor(props: Props) {
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description (required, min 10 chars) — shown on the dashboard and in the directory"
+              placeholder="Description (required, min 10 chars) — shown on the dashboard and in the SVS Directory"
               aria-required
               className={cn(
                 "h-8 max-w-2xl border-0 bg-muted/30 text-xs shadow-none focus-visible:ring-1",

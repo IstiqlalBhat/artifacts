@@ -5,13 +5,14 @@ import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
 import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
+import { MIN_DESCRIPTION_CHARS } from "@/lib/validation";
 
 const MAX_BUNDLE_BYTES = 6 * 1024 * 1024;
 const MAX_DESCRIPTION_CHARS = 1000;
-const MIN_DESCRIPTION_CHARS = 10;
 
-function titleInvalid(title: string): string | null {
-  if (!title || title === "Untitled") return "Title is required.";
+function titleInvalid(title: string, isCreate: boolean): string | null {
+  if (!title) return "Title is required.";
+  if (isCreate && title === "Untitled") return "Title is required.";
   return null;
 }
 
@@ -80,7 +81,7 @@ export async function createArtifact(input: {
   }
 
   const title = input.title.trim();
-  const titleErr = titleInvalid(title);
+  const titleErr = titleInvalid(title, true);
   if (titleErr) return { error: titleErr };
 
   const description = input.description?.trim() ?? "";
@@ -140,7 +141,7 @@ export async function updateArtifact(
   const normalized = { ...patch } as Record<string, unknown>;
   if (Object.prototype.hasOwnProperty.call(patch, "title")) {
     const trimmed = patch.title?.trim() ?? "";
-    const titleErr = titleInvalid(trimmed);
+    const titleErr = titleInvalid(trimmed, false);
     if (titleErr) return { error: titleErr };
     normalized.title = trimmed;
   }

@@ -14,10 +14,13 @@ import { cn } from "@/lib/utils";
 export function CreateArtifactView() {
   const [showBlank, setShowBlank] = useState(false);
   const { staging, clearStaging } = useImportStaging();
-  const [imported, setImported] = useState<ImportStaging | null>(() => staging);
+  const [imported, setImported] = useState<ImportStaging | null>(null);
   useEffect(() => {
     if (staging) {
-      setImported((prev) => prev ?? staging);
+      // Snapshot the global hand-off into local state, then clear it. Local copy
+      // survives the clear so the editor keeps rendering after staging goes null.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setImported(staging);
       clearStaging();
     }
   }, [staging, clearStaging]);
