@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Clock3, FileCode2, Library, User } from "lucide-react";
 import { Header } from "@/components/Header";
+import { DirectoryCopyButton } from "@/components/DirectoryCopyButton";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -12,6 +13,7 @@ type Row = {
   kind: "html" | "jsx";
   owner_email: string | null;
   updated_at: string;
+  share_token: string | null;
 };
 
 export default async function DirectoryPage() {
@@ -23,7 +25,9 @@ export default async function DirectoryPage() {
 
   const { data, error } = await supabase
     .from("artifacts")
-    .select("id, title, description, kind, owner_email, updated_at")
+    .select(
+      "id, title, description, kind, owner_email, updated_at, share_token",
+    )
     .eq("in_directory", true)
     .order("updated_at", { ascending: false });
 
@@ -57,10 +61,11 @@ export default async function DirectoryPage() {
           <EmptyState />
         ) : (
           <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm shadow-primary/5">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_12rem_9rem_4rem]">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_12rem_9rem_6rem_4rem]">
               <span>Artifact</span>
               <span className="hidden sm:block">Author</span>
               <span className="hidden sm:block">Updated</span>
+              <span className="hidden sm:block">Public URL</span>
               <span className="text-right">Open</span>
             </div>
             <div className="divide-y divide-border">
@@ -77,7 +82,7 @@ export default async function DirectoryPage() {
 
 function DirectoryRow({ artifact }: { artifact: Row }) {
   return (
-    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_12rem_9rem_4rem]">
+    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_12rem_9rem_6rem_4rem]">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-background text-accent">
           <FileCode2 className="h-5 w-5" />
@@ -100,6 +105,12 @@ function DirectoryRow({ artifact }: { artifact: Row }) {
       <span className="hidden items-center gap-1.5 text-sm text-muted-foreground sm:flex">
         <Clock3 className="h-3.5 w-3.5" />
         {formatDate(artifact.updated_at)}
+      </span>
+      <span className="hidden sm:flex">
+        <DirectoryCopyButton
+          shareToken={artifact.share_token}
+          title={artifact.title}
+        />
       </span>
       <span className="flex justify-end text-muted-foreground transition-colors group-hover:text-foreground">
         <ArrowRight className="h-4 w-4" />

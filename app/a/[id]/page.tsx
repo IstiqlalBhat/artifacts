@@ -32,6 +32,7 @@ export default async function ArtifactPage({ params }: { params: Params }) {
       <ShareBar
         artifactId={data.id}
         initialShareToken={data.share_token as string | null}
+        initialInDirectory={Boolean(data.in_directory)}
       />
       <main className="flex-1 min-h-0">
         <ArtifactEditor

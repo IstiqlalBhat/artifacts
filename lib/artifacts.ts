@@ -54,6 +54,21 @@ async function getShareToken(id: string): Promise<string | null> {
   return (data?.share_token as string | null) ?? null;
 }
 
+async function getShareState(
+  id: string,
+): Promise<{ share_token: string | null; in_directory: boolean }> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("artifacts")
+    .select("share_token, in_directory")
+    .eq("id", id)
+    .maybeSingle();
+  return {
+    share_token: (data?.share_token as string | null) ?? null,
+    in_directory: Boolean(data?.in_directory),
+  };
+}
+
 function bustShares(tokens: Array<string | null>) {
   const seen = new Set<string>();
   for (const t of tokens) {
@@ -95,6 +110,7 @@ export async function createArtifact(input: {
   const sizeError = bundleTooBig(input.files);
   if (sizeError) return { error: sizeError };
 
+  const inDirectory = input.inDirectory ?? false;
   const { data, error } = await supabase
     .from("artifacts")
     .insert({
@@ -104,7 +120,8 @@ export async function createArtifact(input: {
       files: input.files,
       entry: input.entry,
       description,
-      in_directory: input.inDirectory ?? false,
+      in_directory: inDirectory,
+      share_token: inDirectory ? nanoid(12) : null,
     })
     .select("id")
     .single();
@@ -158,6 +175,10 @@ export async function updateArtifact(
 
   const existingToken = await getShareToken(id);
 
+  if (patch.inDirectory === true && !existingToken) {
+    normalized.share_token = nanoid(12);
+  }
+
   const { error } = await supabase
     .from("artifacts")
     .update(normalized)
@@ -180,15 +201,22 @@ export async function toggleDirectory(id: string, inDirectory: boolean) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not signed in" };
 
+  const patch: Record<string, unknown> = { in_directory: inDirectory };
+  if (inDirectory) {
+    const existingToken = await getShareToken(id);
+    if (!existingToken) patch.share_token = nanoid(12);
+  }
+
   const { error } = await supabase
     .from("artifacts")
-    .update({ in_directory: inDirectory })
+    .update(patch)
     .eq("id", id)
     .eq("owner", user.id);
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
   revalidatePath("/directory");
+  revalidatePath(`/a/${id}`);
   return { in_directory: inDirectory };
 }
 
@@ -199,7 +227,10 @@ export async function toggleShare(id: string, share: boolean) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not signed in" };
 
-  const existingToken = await getShareToken(id);
+  const { share_token: existingToken, in_directory } = await getShareState(id);
+  if (!share && in_directory) {
+    return { error: "Remove from the SVS Directory first." };
+  }
   const share_token = share ? nanoid(12) : null;
 
   const { error } = await supabase
