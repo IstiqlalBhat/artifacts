@@ -51,7 +51,7 @@ export default async function DirectoryArtifactPage({
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Directory
+            SVS Directory
           </Link>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-sm font-semibold">{data.title}</h1>

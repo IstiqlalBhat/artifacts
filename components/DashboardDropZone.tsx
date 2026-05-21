@@ -26,17 +26,18 @@ export function DashboardDropZone({ children }: { children: React.ReactNode }) {
             {busy ? (
               <>
                 <Loader2 className="h-8 w-8 animate-spin text-accent" />
-                <p className="text-sm font-medium">Creating artifact...</p>
+                <p className="text-sm font-medium">Reading files...</p>
               </>
             ) : (
               <>
                 <FolderPlus className="h-8 w-8 text-accent" />
                 <p className="text-base font-semibold">
-                  Drop to create a new artifact
+                  Drop to start a new artifact
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Folder name becomes the title. HTML, CSS, JS, JSX, TS, TSX,
-                  and images are imported with their relative paths.
+                  Folder name suggests the title. HTML, CSS, JS, JSX, TS, TSX,
+                  and images are imported with their relative paths. You&apos;ll
+                  add a description before saving.
                 </p>
               </>
             )}

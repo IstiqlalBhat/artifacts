@@ -60,7 +60,7 @@ export default async function DashboardPage() {
             <div>
               <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
                 <Library className="h-4 w-4" />
-                Library
+                My Library
               </p>
               <h1 className="text-3xl font-semibold sm:text-4xl">
                 Your artifacts
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
             <Stat label="Artifacts" value={artifacts.length.toString()} />
             <Stat label="Files stored" value={fileCount.toString()} />
             <Stat label="Public links" value={sharedCount.toString()} />
-            <Stat label="In directory" value={directoryCount.toString()} />
+            <Stat label="In SVS Directory" value={directoryCount.toString()} />
           </div>
 
           {error && (
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                 <span>Artifact</span>
                 <span className="hidden sm:block">Updated</span>
                 <span className="hidden sm:block">Sharing</span>
-                <span className="hidden sm:block">Directory</span>
+                <span className="hidden sm:block">SVS Directory</span>
                 <span className="hidden text-center sm:block">Delete</span>
                 <span className="text-right">Open</span>
               </div>

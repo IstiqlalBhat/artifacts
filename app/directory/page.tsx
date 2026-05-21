@@ -36,7 +36,7 @@ export default async function DirectoryPage() {
         <div className="mb-8">
           <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
             <Library className="h-4 w-4" />
-            Directory
+            SVS Directory
           </p>
           <h1 className="text-3xl font-semibold sm:text-4xl">
             Shared with the org
@@ -119,8 +119,8 @@ function EmptyState() {
       <div className="relative max-w-xl">
         <h2 className="text-xl font-semibold">Nothing in the directory yet</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          When someone checks the Directory box on one of their artifacts,
-          it&apos;ll show up here for everyone signed in.
+          When someone checks the SVS Directory box on one of their
+          artifacts, it&apos;ll show up here for everyone signed in.
         </p>
       </div>
     </div>

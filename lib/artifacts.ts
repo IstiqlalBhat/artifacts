@@ -5,9 +5,27 @@ import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
 import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
+import { MIN_DESCRIPTION_CHARS } from "@/lib/validation";
 
 const MAX_BUNDLE_BYTES = 6 * 1024 * 1024;
 const MAX_DESCRIPTION_CHARS = 1000;
+
+function titleInvalid(title: string, isCreate: boolean): string | null {
+  if (!title) return "Title is required.";
+  if (isCreate && title === "Untitled") return "Title is required.";
+  return null;
+}
+
+function descriptionInvalid(description: string): string | null {
+  if (!description) return "Description is required.";
+  if (description.length < MIN_DESCRIPTION_CHARS) {
+    return `Description must be at least ${MIN_DESCRIPTION_CHARS} characters.`;
+  }
+  if (description.length > MAX_DESCRIPTION_CHARS) {
+    return `Description must be ${MAX_DESCRIPTION_CHARS} characters or fewer.`;
+  }
+  return null;
+}
 
 function fileByteSize(f: ArtifactFile): number {
   if (!f.content) return 0;
@@ -63,19 +81,12 @@ export async function createArtifact(input: {
   }
 
   const title = input.title.trim();
-  if (!title || title === "Untitled") {
-    return { error: "Title is required." };
-  }
+  const titleErr = titleInvalid(title, true);
+  if (titleErr) return { error: titleErr };
 
   const description = input.description?.trim() ?? "";
-  if (!description) {
-    return { error: "Description is required." };
-  }
-  if (description.length > MAX_DESCRIPTION_CHARS) {
-    return {
-      error: `Description must be ${MAX_DESCRIPTION_CHARS} characters or fewer.`,
-    };
-  }
+  const descErr = descriptionInvalid(description);
+  if (descErr) return { error: descErr };
 
   if (!input.files.length) {
     return { error: "Add at least one file" };
@@ -128,14 +139,17 @@ export async function updateArtifact(
   }
 
   const normalized = { ...patch } as Record<string, unknown>;
+  if (Object.prototype.hasOwnProperty.call(patch, "title")) {
+    const trimmed = patch.title?.trim() ?? "";
+    const titleErr = titleInvalid(trimmed, false);
+    if (titleErr) return { error: titleErr };
+    normalized.title = trimmed;
+  }
   if (Object.prototype.hasOwnProperty.call(patch, "description")) {
     const trimmed = patch.description?.trim() ?? "";
-    if (trimmed.length > MAX_DESCRIPTION_CHARS) {
-      return {
-        error: `Description must be ${MAX_DESCRIPTION_CHARS} characters or fewer.`,
-      };
-    }
-    normalized.description = trimmed || null;
+    const descErr = descriptionInvalid(trimmed);
+    if (descErr) return { error: descErr };
+    normalized.description = trimmed;
   }
   if (Object.prototype.hasOwnProperty.call(patch, "inDirectory")) {
     normalized.in_directory = patch.inDirectory;

@@ -25,13 +25,13 @@ export async function Header() {
               href="/dashboard"
               className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
             >
-              Library
+              My Library
             </Link>
             <Link
               href="/directory"
               className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
             >
-              Directory
+              SVS Directory
             </Link>
           </>
         )}
