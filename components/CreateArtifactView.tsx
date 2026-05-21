@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FilePlus2, FolderPlus, Loader2, Sparkles } from "lucide-react";
 import { ArtifactEditor } from "@/components/ArtifactEditor";
 import { EntryPicker } from "@/components/EntryPicker";
 import { useFolderImport } from "@/lib/useFolderImport";
+import {
+  useImportStaging,
+  type ImportStaging,
+} from "@/components/ImportStagingProvider";
 import { cn } from "@/lib/utils";
 
 export function CreateArtifactView() {
-  const [showEditor, setShowEditor] = useState(false);
+  const [showBlank, setShowBlank] = useState(false);
+  const { staging, clearStaging } = useImportStaging();
+  const [imported, setImported] = useState<ImportStaging | null>(() => staging);
+  useEffect(() => {
+    if (staging) {
+      setImported((prev) => prev ?? staging);
+      clearStaging();
+    }
+  }, [staging, clearStaging]);
+
   const {
     hover,
     busy,
@@ -20,7 +33,23 @@ export function CreateArtifactView() {
     clearError,
   } = useFolderImport();
 
-  if (showEditor) {
+  if (imported) {
+    return (
+      <ArtifactEditor
+        mode="new"
+        initial={{
+          title: imported.suggestedTitle ?? "",
+          description: "",
+          kind: imported.kind,
+          files: imported.files,
+          entry: imported.entry,
+          inDirectory: false,
+        }}
+      />
+    );
+  }
+
+  if (showBlank) {
     return <ArtifactEditor mode="new" />;
   }
 
@@ -40,9 +69,9 @@ export function CreateArtifactView() {
         {busy && !pending ? (
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-accent" />
-            <p className="text-base font-semibold">Creating artifact...</p>
+            <p className="text-base font-semibold">Reading files...</p>
             <p className="text-xs text-muted-foreground">
-              Reading files, picking an entry, saving.
+              Opening the editor so you can title and describe it.
             </p>
           </div>
         ) : (
@@ -73,7 +102,7 @@ export function CreateArtifactView() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={() => setShowEditor(true)}
+                onClick={() => setShowBlank(true)}
                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium shadow-sm shadow-primary/5 transition-colors hover:bg-muted"
               >
                 <FilePlus2 className="h-4 w-4" />

@@ -66,7 +66,7 @@ export function DirectoryToggle({
             Failed
           </span>
         ) : (
-          "Directory"
+          "SVS Directory"
         )}
       </span>
     </label>

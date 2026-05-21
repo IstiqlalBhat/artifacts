@@ -26,18 +26,30 @@ import {
 } from "@/lib/renderer";
 import { createArtifact, updateArtifact } from "@/lib/artifacts";
 
-type Props = {
-  mode: "new" | "edit";
-  initial?: {
-    id: string;
-    title: string;
-    description: string | null;
-    kind: ArtifactKind;
-    files: ArtifactFile[];
-    entry: string | null;
-    inDirectory: boolean;
-  };
+type NewInitial = {
+  title?: string;
+  description?: string | null;
+  kind?: ArtifactKind;
+  files?: ArtifactFile[];
+  entry?: string | null;
+  inDirectory?: boolean;
 };
+
+type EditInitial = {
+  id: string;
+  title: string;
+  description: string | null;
+  kind: ArtifactKind;
+  files: ArtifactFile[];
+  entry: string | null;
+  inDirectory: boolean;
+};
+
+type Props =
+  | { mode: "new"; initial?: NewInitial }
+  | { mode: "edit"; initial: EditInitial };
+
+const MIN_DESCRIPTION_CHARS = 10;
 
 const ACCEPTED =
   ".html,.htm,.css,.js,.mjs,.jsx,.ts,.tsx,.json,.png,.jpg,.jpeg,.gif,.webp,.avif,.svg,.ico,.bmp";
@@ -167,9 +179,11 @@ function detectType(name: string): string {
   return "text/plain";
 }
 
-export function ArtifactEditor({ mode, initial }: Props) {
+export function ArtifactEditor(props: Props) {
+  const { mode } = props;
+  const initial = props.initial;
   const router = useRouter();
-  const [title, setTitle] = useState(initial?.title ?? "Untitled");
+  const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [inDirectory, setInDirectory] = useState(initial?.inDirectory ?? false);
   const [files, setFiles] = useState<ArtifactFile[]>(
@@ -287,22 +301,24 @@ export function ArtifactEditor({ mode, initial }: Props) {
 
   const trimmedTitle = title.trim();
   const trimmedDescription = description.trim();
-  const titleMissing =
-    mode === "new" && (trimmedTitle === "" || trimmedTitle === "Untitled");
-  const descriptionMissing = mode === "new" && trimmedDescription === "";
-  const saveDisabled = pending || titleMissing || descriptionMissing;
+  const titleMissing = trimmedTitle === "" || trimmedTitle === "Untitled";
+  const descriptionInvalid =
+    trimmedDescription.length < MIN_DESCRIPTION_CHARS;
+  const saveDisabled = pending || titleMissing || descriptionInvalid;
 
   const validationHint = titleMissing
     ? "Set a title before saving."
-    : descriptionMissing
-      ? "Add a description before saving."
+    : descriptionInvalid
+      ? trimmedDescription.length === 0
+        ? "Add a description before saving."
+        : `Description must be at least ${MIN_DESCRIPTION_CHARS} characters.`
       : null;
 
   const onSave = () => {
     setErrorMsg(null);
-    if (titleMissing || descriptionMissing) return;
+    if (titleMissing || descriptionInvalid) return;
     startTransition(async () => {
-      if (mode === "new") {
+      if (props.mode === "new") {
         const res = await createArtifact({
           title,
           description,
@@ -318,8 +334,8 @@ export function ArtifactEditor({ mode, initial }: Props) {
         if ("id" in res && res.id) {
           router.push(`/a/${res.id}`);
         }
-      } else if (initial) {
-        const res = await updateArtifact(initial.id, {
+      } else {
+        const res = await updateArtifact(props.initial.id, {
           title,
           description,
           files,
@@ -364,15 +380,11 @@ export function ArtifactEditor({ mode, initial }: Props) {
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={
-                mode === "new"
-                  ? "Description (required) — shown on the dashboard and in the directory"
-                  : "Description — shown on the dashboard and in the directory"
-              }
-              aria-required={mode === "new"}
+              placeholder="Description (required, min 10 chars) — shown on the dashboard and in the directory"
+              aria-required
               className={cn(
                 "h-8 max-w-2xl border-0 bg-muted/30 text-xs shadow-none focus-visible:ring-1",
-                descriptionMissing && "ring-1 ring-destructive/40",
+                descriptionInvalid && "ring-1 ring-destructive/40",
               )}
             />
           </div>
@@ -444,7 +456,7 @@ export function ArtifactEditor({ mode, initial }: Props) {
               )}
             >
               <Globe2 className="h-3.5 w-3.5" />
-              {inDirectory ? "In directory" : "Share to directory"}
+              {inDirectory ? "In SVS Directory" : "Share to SVS Directory"}
             </button>
             <label className="cursor-pointer">
               <input
