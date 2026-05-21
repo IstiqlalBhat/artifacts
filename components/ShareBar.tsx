@@ -10,9 +10,11 @@ import { useRouter } from "next/navigation";
 export function ShareBar({
   artifactId,
   initialShareToken,
+  initialInDirectory,
 }: {
   artifactId: string;
   initialShareToken: string | null;
+  initialInDirectory: boolean;
 }) {
   const router = useRouter();
   const [shareToken, setShareToken] = useState<string | null>(
@@ -27,8 +29,13 @@ export function ShareBar({
     typeof window !== "undefined" && shareToken
       ? `${window.location.origin}/s/${shareToken}`
       : "";
+  const directoryLocked = isShared && initialInDirectory;
+  const toggleHint = directoryLocked
+    ? "Remove from the SVS Directory first."
+    : undefined;
 
   const onToggle = () => {
+    if (directoryLocked) return;
     startTransition(async () => {
       const res = await toggleShare(artifactId, !isShared);
       if ("error" in res) return;
@@ -94,7 +101,8 @@ export function ShareBar({
           size="sm"
           variant={isShared ? "outline" : "primary"}
           onClick={onToggle}
-          disabled={pending}
+          disabled={pending || directoryLocked}
+          title={toggleHint}
         >
           {isShared ? "Make private" : "Share"}
         </Button>
