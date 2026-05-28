@@ -1,37 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(0.985 0.004 235);
-  --foreground: oklch(0.17 0.025 245);
-  --muted: oklch(0.94 0.007 235);
-  --muted-foreground: oklch(0.46 0.025 245);
-  --border: oklch(0.87 0.012 235);
-  --input: oklch(0.87 0.012 235);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.17 0.025 245);
-  --primary: oklch(0.18 0.025 245);
-  --primary-foreground: oklch(0.99 0 0);
-  --accent: oklch(0.64 0.145 178);
-  --accent-foreground: oklch(0.99 0 0);
+  /* Sunlit Workshop — warm honey cream + terracotta + ink */
+  --background: oklch(0.965 0.022 78);
+  --foreground: oklch(0.205 0.022 40);
+  --muted: oklch(0.925 0.022 78);
+  --muted-foreground: oklch(0.46 0.025 38);
+  --border: oklch(0.845 0.022 65);
+  --input: oklch(0.845 0.022 65);
+  --card: oklch(0.985 0.014 80);
+  --card-foreground: oklch(0.205 0.022 40);
+  --primary: oklch(0.555 0.16 38);
+  --primary-foreground: oklch(0.985 0.014 80);
+  --accent: oklch(0.555 0.16 38);
+  --accent-foreground: oklch(0.985 0.014 80);
   --destructive: oklch(0.55 0.22 25);
-  --ring: oklch(0.64 0.145 178);
+  --ring: oklch(0.555 0.16 38);
 }
 
+/* Dark-mode override kept disabled — Sunlit Workshop is light by design.
+   Map .dark to the same warm tokens so the app stays cohesive. */
 .dark {
-  --background: oklch(0.13 0.012 245);
-  --foreground: oklch(0.96 0.006 235);
-  --muted: oklch(0.2 0.014 245);
-  --muted-foreground: oklch(0.68 0.02 235);
-  --border: oklch(0.27 0.014 245);
-  --input: oklch(0.27 0.014 245);
-  --card: oklch(0.17 0.014 245);
-  --card-foreground: oklch(0.96 0.006 235);
-  --primary: oklch(0.96 0.006 235);
-  --primary-foreground: oklch(0.16 0.02 245);
-  --accent: oklch(0.72 0.14 178);
-  --accent-foreground: oklch(0.99 0 0);
+  --background: oklch(0.965 0.022 78);
+  --foreground: oklch(0.205 0.022 40);
+  --muted: oklch(0.925 0.022 78);
+  --muted-foreground: oklch(0.46 0.025 38);
+  --border: oklch(0.845 0.022 65);
+  --input: oklch(0.845 0.022 65);
+  --card: oklch(0.985 0.014 80);
+  --card-foreground: oklch(0.205 0.022 40);
+  --primary: oklch(0.555 0.16 38);
+  --primary-foreground: oklch(0.985 0.014 80);
+  --accent: oklch(0.555 0.16 38);
+  --accent-foreground: oklch(0.985 0.014 80);
   --destructive: oklch(0.6 0.22 25);
-  --ring: oklch(0.72 0.14 178);
+  --ring: oklch(0.555 0.16 38);
 }
 
 @theme inline {
@@ -50,27 +53,12 @@
   --color-destructive: var(--destructive);
   --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --background: oklch(0.13 0.012 245);
-    --foreground: oklch(0.96 0.006 235);
-    --muted: oklch(0.2 0.014 245);
-    --muted-foreground: oklch(0.68 0.02 235);
-    --border: oklch(0.27 0.014 245);
-    --input: oklch(0.27 0.014 245);
-    --card: oklch(0.17 0.014 245);
-    --card-foreground: oklch(0.96 0.006 235);
-    --primary: oklch(0.96 0.006 235);
-    --primary-foreground: oklch(0.16 0.02 245);
-    --accent: oklch(0.72 0.14 178);
-    --accent-foreground: oklch(0.99 0 0);
-    --destructive: oklch(0.6 0.22 25);
-    --ring: oklch(0.72 0.14 178);
-  }
-}
+/* prefers-color-scheme: dark intentionally NOT overridden —
+   Sunlit Workshop forces light across all routes for visual cohesion. */
 
 html,
 body {
@@ -80,7 +68,7 @@ body {
 }
 
 body {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
@@ -93,7 +81,13 @@ body {
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* Hide scrollbar for cleaner look in code editor */
+.serif-display {
+  font-family: var(--font-display), "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.018em;
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 0;
+}
+
 .scroll-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -118,6 +112,7 @@ body {
   background-size: 18px 18px;
 }
 
+/* legacy hero-surface kept for any other route still using it */
 .hero-surface {
   background:
     linear-gradient(115deg, color-mix(in oklch, var(--foreground) 94%, black) 0%, color-mix(in oklch, var(--foreground) 82%, black) 46%, color-mix(in oklch, var(--accent) 42%, black) 100%);
@@ -127,86 +122,337 @@ body {
   background: color-mix(in oklch, var(--card) 82%, var(--muted));
 }
 
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ===============================================
+   Sunlit Workshop — palette + signature surface
+   =============================================== */
+
+:root {
+  --paper: #F4ECDD;
+  --paper-soft: #FAF4E5;
+  --paper-deep: #ECE0C8;
+  --sand: #E3D5B6;
+  --hairline: #D9C9A9;
+  --ink: #2A1F18;
+  --ink-soft: #3F2F23;
+  --ink-mute: #6B5747;
+  --terra: #B85F3E;
+  --terra-deep: #823A22;
+  --terra-soft: #E8A985;
+  --olive: #7A7A48;
+  --honey: #D89B5E;
 }
 
-@keyframes scan-line {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  14%,
-  78% {
-    opacity: 0.35;
-  }
-  100% {
-    transform: translateY(420%);
-    opacity: 0;
-  }
+.sunlit-page {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-@keyframes pulse-border {
-  0%,
-  100% {
-    border-color: color-mix(in oklch, var(--accent) 26%, var(--border));
-  }
-  50% {
-    border-color: color-mix(in oklch, var(--accent) 70%, var(--border));
-  }
-}
+/* Warm canvas with subtle gradient + grain */
 
-.animate-rise-in {
-  animation: rise-in 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.motion-delay-1 {
-  animation-delay: 120ms;
-}
-
-.motion-delay-2 {
-  animation-delay: 220ms;
-}
-
-.motion-delay-3 {
-  animation-delay: 320ms;
-}
-
-.preview-scan {
+.sunlit-canvas {
   position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(60rem 40rem at 8% -10%, rgba(216, 155, 94, 0.22), transparent 60%),
+    radial-gradient(50rem 38rem at 92% 6%, rgba(184, 95, 62, 0.18), transparent 60%),
+    var(--paper);
+  color: var(--ink);
 }
 
-.preview-scan::after {
-  content: "";
+.sunlit-canvas-soft {
+  position: relative;
+  isolation: isolate;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.sunlit-canvas-deep {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, var(--paper-deep) 0%, var(--paper) 100%);
+  color: var(--ink);
+}
+
+/* Hand-printed paper grain (very subtle) */
+
+.paper-grain {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, color-mix(in oklch, var(--accent) 35%, transparent), transparent);
-  height: 34%;
-  animation: scan-line 5.5s ease-in-out infinite;
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.12 0 0 0 0 0.08 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
-.pulse-border {
-  animation: pulse-border 3.5s ease-in-out infinite;
+/* Decorative hairline grid (so subtle, like graph paper) */
+
+.paper-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(42, 31, 24, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(42, 31, 24, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 50%, #000 30%, transparent 80%);
 }
+
+/* Cards (paper on paper, with hairline) */
+
+.paper-card {
+  background: var(--paper-soft);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 36px -22px rgba(82, 56, 30, 0.32);
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), border-color 320ms ease, box-shadow 320ms ease;
+}
+
+.paper-card-deep {
+  background: linear-gradient(180deg, var(--paper-soft) 0%, var(--paper-deep) 100%);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 20px 50px -28px rgba(82, 56, 30, 0.34);
+}
+
+.tile {
+  position: relative;
+}
+
+.tile:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in oklch, #D9C9A9 60%, #B85F3E);
+}
+
+/* Subtle warm hover ring */
+
+.tile-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(40% 60% at 50% 0%, rgba(184, 95, 62, 0.16), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 360ms ease;
+}
+
+.tile:hover .tile-glow::after,
+.tile:focus-visible .tile-glow::after {
+  opacity: 1;
+}
+
+/* Terra accent text gradient (for the italic word in the hero) */
+
+.terra-text {
+  background-image: linear-gradient(120deg, #B85F3E 0%, #D89B5E 50%, #823A22 100%);
+  background-size: 220% 220%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hand-drawn underline accent */
+
+.hand-underline {
+  background-image: linear-gradient(120deg, var(--terra), var(--honey));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 12%;
+  padding-bottom: 0.15em;
+}
+
+/* Buttons — sunlit workshop */
+
+.btn-terra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3rem;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--paper-soft);
+  background: linear-gradient(180deg, var(--terra) 0%, var(--terra-deep) 100%);
+  border: 1px solid rgba(130, 58, 34, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 12px 30px -14px rgba(130, 58, 34, 0.55);
+  transition: transform 200ms ease, box-shadow 240ms ease, filter 240ms ease;
+  white-space: nowrap;
+}
+
+.btn-terra:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 16px 36px -14px rgba(130, 58, 34, 0.6);
+}
+
+.btn-terra:focus-visible {
+  outline: 2px solid var(--terra);
+  outline-offset: 3px;
+}
+
+.btn-paper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3rem;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--ink);
+  background: var(--paper-soft);
+  border: 1px solid var(--hairline);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 4px 14px -8px rgba(82, 56, 30, 0.18);
+  transition: transform 200ms ease, background 240ms ease, border-color 240ms ease;
+  white-space: nowrap;
+}
+
+.btn-paper:hover {
+  background: #FFFCF3;
+  border-color: color-mix(in oklch, #D9C9A9 60%, #B85F3E);
+  transform: translateY(-1px);
+}
+
+.btn-paper:focus-visible {
+  outline: 2px solid var(--terra);
+  outline-offset: 3px;
+}
+
+/* Mono caps label */
+
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ink-mute);
+}
+
+/* Hairline divider */
+
+.hairline-div {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--hairline), transparent);
+}
+
+/* Step badge (terracotta numbered circle) */
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--paper-soft), var(--paper-deep));
+  border: 1px solid var(--hairline);
+  color: var(--terra);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* Preview frame (the live-JSX demo card) */
+
+.preview-frame {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--paper-soft);
+  border: 1px solid var(--hairline);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 30px 80px -30px rgba(82, 56, 30, 0.4);
+}
+
+.preview-frame::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(184, 95, 62, 0.55), rgba(216, 155, 94, 0.35) 45%, transparent 75%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.preview-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, rgba(216, 155, 94, 0.16) 50%, transparent 100%);
+  height: 30%;
+  animation: scan-line 7s ease-in-out infinite;
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-110%); opacity: 0; }
+  18%, 82% { opacity: 0.6; }
+  100% { transform: translateY(360%); opacity: 0; }
+}
+
+/* Entry animations */
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-rise-in {
+  animation: rise-in 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+.motion-delay-1 { animation-delay: 80ms; }
+.motion-delay-2 { animation-delay: 180ms; }
+.motion-delay-3 { animation-delay: 280ms; }
+.motion-delay-4 { animation-delay: 380ms; }
+.motion-delay-5 { animation-delay: 500ms; }
+
+/* Header sits over warm cream tokens now — no per-page overrides needed.
+   The default `bg-background/90` token resolves to warm cream globally. */
+
+/* Reduced motion overrides */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
-  }
-
-  .animate-rise-in,
-  .pulse-border,
-  .preview-scan::after {
-    animation: none !important;
   }
 }

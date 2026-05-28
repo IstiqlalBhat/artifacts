@@ -101,26 +101,30 @@ export default async function LoginPage({
         </section>
 
         <aside className="hidden items-center py-12 lg:flex">
-          <div className="hero-surface w-full overflow-hidden rounded-lg border border-border p-8 text-white shadow-2xl shadow-primary/10">
-            <div className="mb-12 flex items-center justify-between text-sm text-white/70">
-              <span className="code-font">workspace.html</span>
-              <span>private</span>
+          <div className="paper-card-deep w-full overflow-hidden p-8">
+            <div className="mb-10 flex items-center justify-between text-sm">
+              <span className="code-font text-muted-foreground">workspace.html</span>
+              <span className="mono-label">private</span>
             </div>
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="flex items-start gap-3">
-                <Lock className="mt-1 h-5 w-5 text-teal-200" />
+                <Lock className="mt-1 h-5 w-5 text-accent" />
                 <div>
-                  <h2 className="font-semibold">Private by default</h2>
-                  <p className="mt-1 text-sm leading-6 text-white/70">
+                  <h2 className="serif-display text-[1.35rem] leading-tight">
+                    Private by default
+                  </h2>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                     Your drafts stay account-scoped until sharing is switched on.
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Eye className="mt-1 h-5 w-5 text-teal-200" />
+                <Eye className="mt-1 h-5 w-5 text-accent" />
                 <div>
-                  <h2 className="font-semibold">Preview before publishing</h2>
-                  <p className="mt-1 text-sm leading-6 text-white/70">
+                  <h2 className="serif-display text-[1.35rem] leading-tight">
+                    Preview before publishing
+                  </h2>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                     Reopen any artifact and verify the sandboxed render.
                   </p>
                 </div>

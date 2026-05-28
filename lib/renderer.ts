@@ -24,17 +24,61 @@ const isJsx = (n: string) => /\.(jsx|tsx)$/i.test(n);
 const isReactSource = (n: string) => /\.(jsx|tsx|js|ts)$/i.test(n);
 const isImagePath = (n: string) =>
   /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp)$/i.test(n);
+const isScript = (n: string) => /\.m?js$/i.test(n);
+
+type ModuleUrlCache = Map<string, string>;
 
 function stripQueryHash(p: string): string {
   return p.replace(/[?#].*$/, "");
 }
 
-function matchFile(files: ArtifactFile[], wanted: string): ArtifactFile | undefined {
+function normalizePath(p: string): string {
+  const parts: string[] = [];
+  for (const part of stripQueryHash(p).replace(/\\/g, "/").split("/")) {
+    if (!part || part === ".") continue;
+    if (part === "..") {
+      parts.pop();
+    } else {
+      parts.push(part);
+    }
+  }
+  return parts.join("/");
+}
+
+function dirname(p: string): string {
+  const normalized = normalizePath(p);
+  const idx = normalized.lastIndexOf("/");
+  return idx === -1 ? "" : normalized.slice(0, idx);
+}
+
+function isExternalReference(p: string): boolean {
+  return /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(p);
+}
+
+function resolveFrom(baseFileName: string | undefined, wanted: string): string {
   const cleaned = stripQueryHash(wanted);
-  const target = cleaned.replace(/^\.?\/+/, "");
-  return files.find(
-    (f) => f.name === target || f.name === cleaned || f.name === wanted,
-  );
+  if (!baseFileName || cleaned.startsWith("/")) return normalizePath(cleaned);
+  const baseDir = dirname(baseFileName);
+  return normalizePath(baseDir ? `${baseDir}/${cleaned}` : cleaned);
+}
+
+function matchFile(
+  files: ArtifactFile[],
+  wanted: string,
+  baseFileName?: string,
+): ArtifactFile | undefined {
+  if (isExternalReference(wanted)) return undefined;
+
+  const cleaned = stripQueryHash(wanted);
+  const targets = new Set([
+    normalizePath(cleaned),
+    resolveFrom(baseFileName, cleaned),
+  ]);
+
+  return files.find((f) => {
+    const name = normalizePath(f.name);
+    return targets.has(name) || f.name === cleaned || f.name === wanted;
+  });
 }
 
 function escapeAttr(s: string): string {
@@ -45,6 +89,21 @@ function escapeAttr(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * Encode a UTF-8 string as base64 in a way that works on both Node and the
+ * browser. The artifact document embeds user source as base64 so we do not
+ * have to wrestle with arbitrary characters inside an HTML/JS string.
+ */
+function encodeBase64(s: string): string {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(s, "utf8").toString("base64");
+  }
+  const bytes = new TextEncoder().encode(s);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
 function dataUrlFor(file: ArtifactFile): string {
   const mime = file.type || "application/octet-stream";
   if (file.encoding === "base64") {
@@ -53,37 +112,148 @@ function dataUrlFor(file: ArtifactFile): string {
   return `data:${mime};charset=utf-8,${encodeURIComponent(file.content)}`;
 }
 
-function inlineCssUrls(css: string, files: ArtifactFile[]): string {
+function scriptSafe(s: string): string {
+  return s.replace(/<\/script/gi, "<\\/script");
+}
+
+function inlineCssUrls(
+  css: string,
+  files: ArtifactFile[],
+  baseFileName?: string,
+): string {
   return css.replace(
     /url\(\s*(["']?)([^"')]+)\1\s*\)/gi,
     (match, _q, raw: string) => {
-      if (/^(?:https?:|data:|#|\/\/)/i.test(raw)) return match;
-      const file = matchFile(files, raw);
+      if (isExternalReference(raw)) return match;
+      const file = matchFile(files, raw, baseFileName);
       if (!file) return match;
       return `url("${dataUrlFor(file)}")`;
     },
   );
 }
 
+function hasModuleType(attrs: string): boolean {
+  return /\btype\s*=\s*(["'])module\1/i.test(attrs);
+}
+
+function resolveScriptModule(
+  files: ArtifactFile[],
+  specifier: string,
+  baseFileName: string,
+): ArtifactFile | undefined {
+  if (isExternalReference(specifier)) return undefined;
+
+  const direct = matchFile(files, specifier, baseFileName);
+  if (direct) return direct;
+
+  const cleaned = stripQueryHash(specifier);
+  const extensions = [".js", ".mjs", "/index.js", "/index.mjs"];
+  for (const ext of extensions) {
+    const file = matchFile(files, `${cleaned}${ext}`, baseFileName);
+    if (file) return file;
+  }
+
+  return undefined;
+}
+
+function moduleDataUrl(
+  file: ArtifactFile,
+  files: ArtifactFile[],
+  cache: ModuleUrlCache,
+  stack: Set<string>,
+): string | null {
+  const key = normalizePath(file.name);
+  const cached = cache.get(key);
+  if (cached) return cached;
+  if (stack.has(key)) return null;
+
+  const transformed = transformModuleSource(
+    file.content,
+    file.name,
+    files,
+    cache,
+    new Set(stack).add(key),
+  );
+  const url = `data:text/javascript;charset=utf-8;base64,${encodeBase64(
+    transformed,
+  )}`;
+  cache.set(key, url);
+  return url;
+}
+
+function transformModuleSource(
+  source: string,
+  baseFileName: string,
+  files: ArtifactFile[],
+  cache: ModuleUrlCache,
+  stack = new Set<string>(),
+): string {
+  const replaceSpecifier = (
+    match: string,
+    pre: string,
+    specifier: string,
+    post: string,
+  ) => {
+    const file = resolveScriptModule(files, specifier, baseFileName);
+    if (!file || !isScript(file.name)) return match;
+    const url = moduleDataUrl(file, files, cache, stack);
+    return url ? `${pre}${url}${post}` : match;
+  };
+
+  return source
+    .replace(
+      /(\bimport\s+(?:[\s\S]*?\s+from\s*)?["'])([^"']+)(["'])/g,
+      replaceSpecifier,
+    )
+    .replace(
+      /(\bexport\s+[\s\S]*?\s+from\s*["'])([^"']+)(["'])/g,
+      replaceSpecifier,
+    )
+    .replace(
+      /(\bimport\(\s*["'])([^"']+)(["']\s*\))/g,
+      replaceSpecifier,
+    );
+}
+
 function inlineLinks(
   html: string,
   files: ArtifactFile[],
   visited: Set<string> = new Set(),
+  baseFileName?: string,
+  moduleCache: ModuleUrlCache = new Map(),
 ): string {
   let out = html.replace(
     /<link\b[^>]*?href=["']([^"']+?\.css(?:[?#][^"']*)?)["'][^>]*?>/gi,
     (match, href) => {
-      const file = matchFile(files, href);
+      const file = matchFile(files, href, baseFileName);
       return file
-        ? `<style>\n${inlineCssUrls(file.content, files)}\n</style>`
+        ? `<style>\n${inlineCssUrls(file.content, files, file.name)}\n</style>`
         : match;
     },
   );
   out = out.replace(
     /<script\b([^>]*?)\bsrc=["']([^"']+?\.m?js(?:[?#][^"']*)?)["']([^>]*)><\/script>/gi,
-    (match, _pre, src) => {
-      const file = matchFile(files, src);
-      return file ? `<script>\n${file.content}\n<\/script>` : match;
+    (match, pre: string, src: string, post: string) => {
+      const file = matchFile(files, src, baseFileName);
+      if (!file) return match;
+      const attrs = `${pre}${post}`;
+      const content = hasModuleType(attrs)
+        ? transformModuleSource(file.content, file.name, files, moduleCache)
+        : file.content;
+      return `<script${attrs}>\n${scriptSafe(content)}\n<\/script>`;
+    },
+  );
+  out = out.replace(
+    /<script\b([^>]*)>([\s\S]*?)<\/script>/gi,
+    (match, attrs: string, content: string) => {
+      if (!hasModuleType(attrs) || /\bsrc\s*=/.test(attrs)) return match;
+      const transformed = transformModuleSource(
+        content,
+        baseFileName ?? "",
+        files,
+        moduleCache,
+      );
+      return `<script${attrs}>\n${scriptSafe(transformed)}\n<\/script>`;
     },
   );
   // Inline nested HTML iframes so a folder of pages (e.g. an outer page that
@@ -92,12 +262,18 @@ function inlineLinks(
   out = out.replace(
     /<iframe\b([^>]*?)\bsrc=["']([^"']+?\.html?(?:[?#][^"']*)?)["']([^>]*)>/gi,
     (match, pre: string, src: string, post: string) => {
-      const file = matchFile(files, src);
+      const file = matchFile(files, src, baseFileName);
       if (!file) return match;
       const key = file.name;
       if (visited.has(key)) return match;
       const nestedVisited = new Set(visited).add(key);
-      const inner = inlineLinks(file.content, files, nestedVisited);
+      const inner = inlineLinks(
+        file.content,
+        files,
+        nestedVisited,
+        file.name,
+        moduleCache,
+      );
       return `<iframe${pre}srcdoc="${escapeAttr(inner)}"${post}>`;
     },
   );
@@ -108,7 +284,7 @@ function inlineLinks(
     /<img\b([^>]*?)\bsrc=["']([^"']+)["']([^>]*)>/gi,
     (match, pre: string, src: string, post: string) => {
       if (!isImagePath(stripQueryHash(src))) return match;
-      const file = matchFile(files, src);
+      const file = matchFile(files, src, baseFileName);
       if (!file) return match;
       return `<img${pre}src="${dataUrlFor(file)}"${post}>`;
     },
@@ -117,7 +293,7 @@ function inlineLinks(
     /<source\b([^>]*?)\bsrc=["']([^"']+)["']([^>]*)>/gi,
     (match, pre: string, src: string, post: string) => {
       if (!isImagePath(stripQueryHash(src))) return match;
-      const file = matchFile(files, src);
+      const file = matchFile(files, src, baseFileName);
       if (!file) return match;
       return `<source${pre}src="${dataUrlFor(file)}"${post}>`;
     },
@@ -125,7 +301,7 @@ function inlineLinks(
   out = out.replace(
     /<link\b([^>]*?\brel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]*?)\bhref=["']([^"']+)["']([^>]*)>/gi,
     (match, pre: string, href: string, post: string) => {
-      const file = matchFile(files, href);
+      const file = matchFile(files, href, baseFileName);
       if (!file) return match;
       return `<link${pre}href="${dataUrlFor(file)}"${post}>`;
     },
@@ -143,7 +319,12 @@ export function buildHtmlDocument(
     files.find((f) => isHtml(f.name));
 
   if (indexFile) {
-    return inlineLinks(indexFile.content, files);
+    return inlineLinks(
+      indexFile.content,
+      files,
+      new Set([indexFile.name]),
+      indexFile.name,
+    );
   }
 
   // No HTML — synthesize a basic document from css + js
@@ -168,22 +349,6 @@ export function buildHtmlDocument(
 <script>${jsBlock}<\/script>
 </body>
 </html>`;
-}
-
-/**
- * Encode a UTF-8 string as base64 in a way that works on both Node and the
- * browser. The artifact document embeds the user's source as base64 so we
- * don't have to wrestle with arbitrary characters inside an HTML/JS string.
- */
-function encodeBase64(s: string): string {
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(s, "utf8").toString("base64");
-  }
-  const bytes = new TextEncoder().encode(s);
-  let bin = "";
-  for (const b of bytes) bin += String.fromCharCode(b);
-  // btoa exists in the browser
-  return btoa(bin);
 }
 
 export function buildJsxDocument(

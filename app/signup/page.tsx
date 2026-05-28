@@ -99,26 +99,30 @@ export default async function SignupPage({
         </section>
 
         <aside className="hidden items-center py-12 lg:flex">
-          <div className="hero-surface w-full overflow-hidden rounded-lg border border-border p-8 text-white shadow-2xl shadow-primary/10">
-            <div className="mb-12 flex items-center justify-between text-sm text-white/70">
-              <span className="code-font">new-artifact.jsx</span>
-              <span>ready</span>
+          <div className="paper-card-deep w-full overflow-hidden p-8">
+            <div className="mb-10 flex items-center justify-between text-sm">
+              <span className="code-font text-muted-foreground">new-artifact.jsx</span>
+              <span className="mono-label">ready</span>
             </div>
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="flex items-start gap-3">
-                <FileCode2 className="mt-1 h-5 w-5 text-teal-200" />
+                <FileCode2 className="mt-1 h-5 w-5 text-accent" />
                 <div>
-                  <h2 className="font-semibold">Upload or paste code</h2>
-                  <p className="mt-1 text-sm leading-6 text-white/70">
+                  <h2 className="serif-display text-[1.35rem] leading-tight">
+                    Upload or paste code
+                  </h2>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                     Start with a single file or keep a small project together.
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Share2 className="mt-1 h-5 w-5 text-teal-200" />
+                <Share2 className="mt-1 h-5 w-5 text-accent" />
                 <div>
-                  <h2 className="font-semibold">Share when it is ready</h2>
-                  <p className="mt-1 text-sm leading-6 text-white/70">
+                  <h2 className="serif-display text-[1.35rem] leading-tight">
+                    Share when it is ready
+                  </h2>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                     Public links open straight into the rendered artifact.
                   </p>
                 </div>

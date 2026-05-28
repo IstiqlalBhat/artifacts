@@ -73,7 +73,7 @@ Open <http://localhost:3000>.
 pnpm dlx vercel@latest        # first-time link (will prompt to create project)
 pnpm dlx vercel env add NEXT_PUBLIC_SUPABASE_URL
 pnpm dlx vercel env add NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-pnpm dlx vercel env add NEXT_PUBLIC_SITE_URL   # https://your-app.vercel.app
+pnpm dlx vercel env add NEXT_PUBLIC_SITE_URL   # https://your-domain.com
 pnpm dlx vercel --prod
 ```
 
@@ -85,15 +85,15 @@ pnpm dlx vercel --prod
    **Production** and **Preview**:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `NEXT_PUBLIC_SITE_URL` — your deployment URL (e.g. `https://artifacts.vercel.app`)
+   - `NEXT_PUBLIC_SITE_URL` — your production URL (e.g. `https://svsartifacts.com`). Set this on **Production only**; leave Preview unset so previews fall back to `VERCEL_URL`.
 4. **Deploy**.
 
 ### After the first deploy — point Supabase at production
 
 Supabase dashboard → **Authentication → URL Configuration**:
 
-- **Site URL** → your Vercel URL
-- **Redirect URLs** → add `https://your-app.vercel.app/auth/callback` (keep the
+- **Site URL** → your production URL
+- **Redirect URLs** → add `https://your-domain.com/auth/callback` (keep the
   localhost one too for dev).
 
 Existing share links keep working — the share token is stored in the DB and
