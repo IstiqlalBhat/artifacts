@@ -191,7 +191,7 @@ export default async function Home() {
           <div className="halftone halftone-fade" aria-hidden="true" />
           <div className="grain" aria-hidden="true" />
 
-          <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-16 sm:px-8 sm:pb-24 sm:pt-20 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 lg:px-10 lg:pb-32 lg:pt-24">
+          <div className="relative z-10 mx-auto grid grid-cols-1 w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-16 sm:px-8 sm:pb-24 sm:pt-20 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 lg:px-10 lg:pb-32 lg:pt-24">
             <div className="min-w-0">
               <div className="animate-rise-in flex flex-wrap items-center gap-3">
                 <span className="chip">
@@ -201,7 +201,7 @@ export default async function Home() {
                 <span className="mono-label">Suncoast Venture Studio</span>
               </div>
 
-              <h1 className="animate-rise-in motion-delay-1 display offset-head mt-6 text-balance text-[clamp(2.7rem,8.5vw,5.75rem)] leading-[0.92] text-ink">
+              <h1 className="animate-rise-in motion-delay-1 display offset-head mt-6 text-balance text-[clamp(2.05rem,8.5vw,5.75rem)] leading-[0.95] text-ink">
                 Drop the files.
                 <br />
                 Watch it run.
@@ -271,7 +271,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               <Capability
                 eyebrow="01"
                 icon={<Upload className="h-4 w-4" aria-hidden="true" />}
@@ -316,7 +316,7 @@ export default async function Home() {
               </h2>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               <Step
                 n="01"
                 title="Upload or paste"
@@ -349,7 +349,7 @@ export default async function Home() {
 
         {/* ───── TRUST / SANDBOX DETAIL ───── */}
         <section className="riso-canvas relative isolate overflow-hidden border-t-[1.5px] border-ink/15">
-          <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-16 lg:px-10 lg:py-28">
+          <div className="relative z-10 mx-auto grid grid-cols-1 max-w-7xl gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-16 lg:px-10 lg:py-28">
             <div>
               <p className="mono-label">Trust / 03</p>
               <h2 className="display mt-3 text-balance text-[clamp(1.85rem,4vw,2.9rem)] leading-[1.04] text-ink">

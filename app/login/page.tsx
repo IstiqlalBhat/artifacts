@@ -31,7 +31,7 @@ export default async function LoginPage({
         </div>
       </header>
 
-      <main className="mx-auto grid min-h-[calc(100svh-4rem)] max-w-7xl px-4 sm:px-6 lg:grid-cols-[1fr_0.9fr]">
+      <main className="mx-auto grid grid-cols-1 min-h-[calc(100svh-4rem)] max-w-7xl px-4 sm:px-6 lg:grid-cols-[1fr_0.9fr]">
         <section className="flex items-center py-12">
           <div className="w-full max-w-md">
             <div className="mb-8">
