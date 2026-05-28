@@ -60,3 +60,27 @@ export async function signup(formData: FormData) {
     `/login?message=${encodeURIComponent("Check your email to confirm your account, then sign in.")}`,
   );
 }
+
+export async function signInWithGoogle(formData: FormData) {
+  const next = String(formData.get("next") ?? "/dashboard");
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
+  });
+
+  if (error) {
+    return redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // On the server the OAuth consent URL is returned rather than auto-redirecting.
+  if (data.url) {
+    redirect(data.url);
+  }
+}

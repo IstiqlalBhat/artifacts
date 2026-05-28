@@ -3,6 +3,7 @@ import { ArrowRight, Eye, Lock, SquareDashedMousePointer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { login } from "./actions";
 
 type SearchParams = Promise<{
@@ -55,38 +56,46 @@ export default async function LoginPage({
               </div>
             )}
 
-            <form action={login} className="riso-card-pop p-6">
-              {redirect && (
-                <input type="hidden" name="redirect" value={redirect} />
-              )}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" size="lg">
-                  Sign in
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+            <div className="riso-card-pop p-6">
+              <GoogleAuthButton next={redirect ?? "/dashboard"} />
+              <div className="my-5 flex items-center gap-3" aria-hidden="true">
+                <span className="hairline-div flex-1" />
+                <span className="mono-label">or</span>
+                <span className="hairline-div flex-1" />
               </div>
-            </form>
+              <form action={login}>
+                {redirect && (
+                  <input type="hidden" name="redirect" value={redirect} />
+                )}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" size="lg">
+                    Sign in
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+            </div>
 
             <p className="mt-6 text-sm text-ink-mute">
               No account yet?{" "}

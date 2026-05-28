@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { signup } from "../login/actions";
 
 type SearchParams = Promise<{ error?: string }>;
@@ -52,39 +53,47 @@ export default async function SignupPage({
               </div>
             )}
 
-            <form action={signup} className="riso-card-pop p-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    minLength={8}
-                    required
-                  />
-                  <p className="text-xs text-ink-mute">
-                    Use at least 8 characters.
-                  </p>
-                </div>
-                <Button type="submit" className="w-full" size="lg">
-                  Create account
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+            <div className="riso-card-pop p-6">
+              <GoogleAuthButton next="/dashboard" />
+              <div className="my-5 flex items-center gap-3" aria-hidden="true">
+                <span className="hairline-div flex-1" />
+                <span className="mono-label">or</span>
+                <span className="hairline-div flex-1" />
               </div>
-            </form>
+              <form action={signup}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="new-password"
+                      minLength={8}
+                      required
+                    />
+                    <p className="text-xs text-ink-mute">
+                      Use at least 8 characters.
+                    </p>
+                  </div>
+                  <Button type="submit" className="w-full" size="lg">
+                    Create account
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+            </div>
 
             <p className="mt-6 text-sm text-ink-mute">
               Already have an account?{" "}
