@@ -11,21 +11,21 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm shadow-primary/10",
+    "bg-cobalt text-paper-soft border-[1.5px] border-ink shadow-[2px_2px_0_var(--ink)] hover:bg-cobalt-deep hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_var(--ink)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_var(--ink)]",
   secondary:
-    "bg-muted text-foreground hover:bg-muted/80 border border-border",
-  ghost: "hover:bg-muted text-foreground",
+    "bg-paper-soft text-ink border-[1.5px] border-ink shadow-[2px_2px_0_var(--ink)] hover:bg-white hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_var(--orange)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_var(--ink)]",
   outline:
-    "border border-border bg-transparent hover:bg-muted text-foreground",
+    "border-[1.5px] border-ink bg-transparent text-ink hover:bg-paper-deep",
+  ghost: "text-ink hover:bg-paper-deep",
   destructive:
-    "bg-destructive text-white hover:bg-destructive/90",
+    "bg-destructive text-white border-[1.5px] border-ink shadow-[2px_2px_0_var(--ink)] hover:brightness-95 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_var(--ink)]",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-xs rounded-md",
-  md: "h-9 px-4 text-sm rounded-md",
-  lg: "h-11 px-5 text-sm rounded-md",
-  icon: "h-9 w-9 rounded-md",
+  sm: "h-8 px-3 text-xs rounded-lg",
+  md: "h-9 px-4 text-sm rounded-lg",
+  lg: "h-11 px-5 text-sm rounded-[11px]",
+  icon: "h-9 w-9 rounded-lg",
 };
 
 export function buttonStyles({
@@ -38,9 +38,9 @@ export function buttonStyles({
   className?: string;
 } = {}) {
   return cn(
-    "inline-flex items-center justify-center gap-2 font-medium",
-    "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-    "disabled:opacity-50 disabled:pointer-events-none",
+    "inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.01em]",
+    "transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none",
     variants[variant],
     sizes[size],
     className,

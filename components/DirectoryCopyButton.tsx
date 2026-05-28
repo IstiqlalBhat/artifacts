@@ -15,7 +15,7 @@ export function DirectoryCopyButton({
 
   if (!shareToken) {
     return (
-      <span className="text-xs text-muted-foreground" aria-label="No public URL">
+      <span className="text-xs text-ink-mute" aria-label="No public URL">
         —
       </span>
     );
@@ -45,7 +45,7 @@ export function DirectoryCopyButton({
         title={copied ? "Copied" : "Copy public URL"}
       >
         {copied ? (
-          <Check className="h-3.5 w-3.5 text-accent" />
+          <Check className="h-3.5 w-3.5 text-orange-deep" />
         ) : (
           <Copy className="h-3.5 w-3.5" />
         )}

@@ -20,14 +20,14 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-background/90">
+    <div className="min-h-screen bg-paper">
+      <header className="border-b-[1.5px] border-ink/15 bg-paper/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card">
-              <SquareDashedMousePointer className="h-4 w-4 text-accent" />
+          <Link href="/" className="group flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)] transition-transform group-hover:-translate-y-0.5">
+              <SquareDashedMousePointer className="h-4 w-4" />
             </span>
-            Artifacts
+            <span className="display text-[1.15rem] text-ink">Artifacts</span>
           </Link>
         </div>
       </header>
@@ -36,26 +36,23 @@ export default async function SignupPage({
         <section className="flex items-center py-12">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <p className="mb-2 text-sm font-medium text-accent">
-                Create workspace
-              </p>
-              <h1 className="text-3xl font-semibold">Start your library</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mono-label mb-3 text-cobalt">Create workspace</p>
+              <h1 className="display offset-head text-[clamp(2.25rem,6vw,3.25rem)] leading-[0.95] text-ink">
+                Start your library
+              </h1>
+              <p className="mt-3 text-[0.97rem] leading-relaxed text-ink-soft">
                 Save live prototypes, keep drafts private, and share finished
                 renders with a single link.
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <div className="mb-4 rounded-lg border-[1.5px] border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
                 {error}
               </div>
             )}
 
-            <form
-              action={signup}
-              className="rounded-lg border border-border bg-card p-5 shadow-xl shadow-primary/5"
-            >
+            <form action={signup} className="riso-card-pop p-6">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -78,7 +75,7 @@ export default async function SignupPage({
                     minLength={8}
                     required
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-ink-mute">
                     Use at least 8 characters.
                   </p>
                 </div>
@@ -89,9 +86,12 @@ export default async function SignupPage({
               </div>
             </form>
 
-            <p className="mt-6 text-sm text-muted-foreground">
+            <p className="mt-6 text-sm text-ink-mute">
               Already have an account?{" "}
-              <Link href="/login" className="font-medium text-accent hover:underline">
+              <Link
+                href="/login"
+                className="font-semibold text-cobalt hover:underline"
+              >
                 Sign in
               </Link>
             </p>
@@ -99,30 +99,37 @@ export default async function SignupPage({
         </section>
 
         <aside className="hidden items-center py-12 lg:flex">
-          <div className="paper-card-deep w-full overflow-hidden p-8">
-            <div className="mb-10 flex items-center justify-between text-sm">
-              <span className="code-font text-muted-foreground">new-artifact.jsx</span>
-              <span className="mono-label">ready</span>
+          <div className="riso-card-pop relative w-full overflow-hidden p-8">
+            <div className="halftone halftone-fade" aria-hidden="true" />
+            <div className="relative mb-10 flex items-center justify-between">
+              <span className="code-font text-sm text-ink-mute">
+                new-artifact.jsx
+              </span>
+              <span className="chip">ready</span>
             </div>
-            <div className="space-y-6">
-              <div className="flex items-start gap-3">
-                <FileCode2 className="mt-1 h-5 w-5 text-accent" />
+            <div className="relative space-y-7">
+              <div className="flex items-start gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)]">
+                  <FileCode2 className="h-5 w-5" />
+                </span>
                 <div>
-                  <h2 className="serif-display text-[1.35rem] leading-tight">
+                  <h2 className="display text-[1.3rem] leading-tight text-ink">
                     Upload or paste code
                   </h2>
-                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                     Start with a single file or keep a small project together.
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <Share2 className="mt-1 h-5 w-5 text-accent" />
+              <div className="flex items-start gap-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-ink bg-orange text-ink shadow-[2px_2px_0_var(--ink)]">
+                  <Share2 className="h-5 w-5" />
+                </span>
                 <div>
-                  <h2 className="serif-display text-[1.35rem] leading-tight">
-                    Share when it is ready
+                  <h2 className="display text-[1.3rem] leading-tight text-ink">
+                    Share when it&apos;s ready
                   </h2>
-                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                     Public links open straight into the rendered artifact.
                   </p>
                 </div>

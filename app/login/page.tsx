@@ -19,14 +19,14 @@ export default async function LoginPage({
   const { redirect, error, message } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-background/90">
+    <div className="min-h-screen bg-paper">
+      <header className="border-b-[1.5px] border-ink/15 bg-paper/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card">
-              <SquareDashedMousePointer className="h-4 w-4 text-accent" />
+          <Link href="/" className="group flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)] transition-transform group-hover:-translate-y-0.5">
+              <SquareDashedMousePointer className="h-4 w-4" />
             </span>
-            Artifacts
+            <span className="display text-[1.15rem] text-ink">Artifacts</span>
           </Link>
         </div>
       </header>
@@ -35,30 +35,27 @@ export default async function LoginPage({
         <section className="flex items-center py-12">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <p className="mb-2 text-sm font-medium text-accent">
-                Account access
-              </p>
-              <h1 className="text-3xl font-semibold">Welcome back</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mono-label mb-3 text-cobalt">Account access</p>
+              <h1 className="display offset-head text-[clamp(2.25rem,6vw,3.25rem)] leading-[0.95] text-ink">
+                Welcome back
+              </h1>
+              <p className="mt-3 text-[0.97rem] leading-relaxed text-ink-soft">
                 Sign in to open your library and continue editing artifacts.
               </p>
             </div>
 
             {message && (
-              <div className="mb-4 rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm text-foreground">
+              <div className="mb-4 rounded-lg border-[1.5px] border-cobalt/40 bg-cobalt/10 px-3.5 py-2.5 text-sm text-ink">
                 {message}
               </div>
             )}
             {error && (
-              <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <div className="mb-4 rounded-lg border-[1.5px] border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
                 {error}
               </div>
             )}
 
-            <form
-              action={login}
-              className="rounded-lg border border-border bg-card p-5 shadow-xl shadow-primary/5"
-            >
+            <form action={login} className="riso-card-pop p-6">
               {redirect && (
                 <input type="hidden" name="redirect" value={redirect} />
               )}
@@ -91,9 +88,12 @@ export default async function LoginPage({
               </div>
             </form>
 
-            <p className="mt-6 text-sm text-muted-foreground">
+            <p className="mt-6 text-sm text-ink-mute">
               No account yet?{" "}
-              <Link href="/signup" className="font-medium text-accent hover:underline">
+              <Link
+                href="/signup"
+                className="font-semibold text-cobalt hover:underline"
+              >
                 Create one
               </Link>
             </p>
@@ -101,38 +101,61 @@ export default async function LoginPage({
         </section>
 
         <aside className="hidden items-center py-12 lg:flex">
-          <div className="paper-card-deep w-full overflow-hidden p-8">
-            <div className="mb-10 flex items-center justify-between text-sm">
-              <span className="code-font text-muted-foreground">workspace.html</span>
-              <span className="mono-label">private</span>
-            </div>
-            <div className="space-y-6">
-              <div className="flex items-start gap-3">
-                <Lock className="mt-1 h-5 w-5 text-accent" />
-                <div>
-                  <h2 className="serif-display text-[1.35rem] leading-tight">
-                    Private by default
-                  </h2>
-                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
-                    Your drafts stay account-scoped until sharing is switched on.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Eye className="mt-1 h-5 w-5 text-accent" />
-                <div>
-                  <h2 className="serif-display text-[1.35rem] leading-tight">
-                    Preview before publishing
-                  </h2>
-                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
-                    Reopen any artifact and verify the sandboxed render.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AuthProof
+            file="workspace.html"
+            tag="private"
+            rows={[
+              {
+                icon: <Lock className="h-5 w-5" />,
+                title: "Private by default",
+                body: "Your drafts stay account-scoped until sharing is switched on.",
+              },
+              {
+                icon: <Eye className="h-5 w-5" />,
+                title: "Preview before publishing",
+                body: "Reopen any artifact and verify the sandboxed render.",
+              },
+            ]}
+          />
         </aside>
       </main>
+    </div>
+  );
+}
+
+function AuthProof({
+  file,
+  tag,
+  rows,
+}: {
+  file: string;
+  tag: string;
+  rows: { icon: React.ReactNode; title: string; body: string }[];
+}) {
+  return (
+    <div className="riso-card-pop relative w-full overflow-hidden p-8">
+      <div className="halftone halftone-fade" aria-hidden="true" />
+      <div className="relative mb-10 flex items-center justify-between">
+        <span className="code-font text-sm text-ink-mute">{file}</span>
+        <span className="chip">{tag}</span>
+      </div>
+      <div className="relative space-y-7">
+        {rows.map((row) => (
+          <div key={row.title} className="flex items-start gap-3.5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)]">
+              {row.icon}
+            </span>
+            <div>
+              <h2 className="display text-[1.3rem] leading-tight text-ink">
+                {row.title}
+              </h2>
+              <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                {row.body}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

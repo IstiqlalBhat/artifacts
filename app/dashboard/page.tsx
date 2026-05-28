@@ -52,32 +52,32 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-paper">
       <Header />
       <DashboardDropZone>
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6">
           <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="mb-2 flex items-center gap-2 text-sm font-medium text-accent">
+              <p className="mono-label mb-3 flex items-center gap-2 text-cobalt">
                 <Library className="h-4 w-4" />
                 My Library
               </p>
-              <h1 className="text-3xl font-semibold sm:text-4xl">
+              <h1 className="display offset-head text-[clamp(2.25rem,6vw,3.5rem)] leading-[0.95] text-ink">
                 Your artifacts
               </h1>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Review drafts, reopen a workbench, or copy a shareable prototype.
-                Drop a folder anywhere on this page to import it as a new
-                artifact.
+              <p className="mt-3 max-w-2xl text-[0.97rem] leading-relaxed text-ink-soft">
+                Review drafts, reopen a workbench, or copy a shareable
+                prototype. Drop a folder anywhere on this page to import it as a
+                new artifact.
               </p>
             </div>
-            <Link href="/new" className={buttonStyles({ size: "lg" })}>
+            <Link href="/new" className="btn-cobalt shrink-0">
               <Plus className="h-4 w-4" />
               New artifact
             </Link>
           </div>
 
-          <div className="mb-8 grid border-y border-border sm:grid-cols-4">
+          <div className="riso-card mb-8 grid grid-cols-2 overflow-hidden p-0 sm:grid-cols-4">
             <Stat label="Artifacts" value={artifacts.length.toString()} />
             <Stat label="Files stored" value={fileCount.toString()} />
             <Stat label="Public links" value={sharedCount.toString()} />
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
           </div>
 
           {error && (
-            <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="mb-6 rounded-lg border-[1.5px] border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
               {error.message}. Run the SQL migration in{" "}
               <code className="code-font">supabase/migrations/</code>.
             </div>
@@ -94,16 +94,16 @@ export default async function DashboardPage() {
           {artifacts.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm shadow-primary/5">
-              <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground sm:grid-cols-[1fr_8rem_8rem_8rem_4rem_4rem]">
-                <span>Artifact</span>
-                <span className="hidden sm:block">Updated</span>
-                <span className="hidden sm:block">Sharing</span>
-                <span className="hidden sm:block">SVS Directory</span>
-                <span className="hidden text-center sm:block">Delete</span>
-                <span className="text-right">Open</span>
+            <div className="riso-card overflow-hidden p-0">
+              <div className="grid grid-cols-[1fr_auto] gap-4 border-b-[1.5px] border-ink/12 bg-paper-deep/50 px-4 py-3 sm:grid-cols-[1fr_8rem_8rem_8rem_4rem_4rem]">
+                <span className="mono-label">Artifact</span>
+                <span className="mono-label hidden sm:block">Updated</span>
+                <span className="mono-label hidden sm:block">Sharing</span>
+                <span className="mono-label hidden sm:block">Directory</span>
+                <span className="mono-label hidden text-center sm:block">Del</span>
+                <span className="mono-label text-right">Open</span>
               </div>
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-ink/10">
                 {artifacts.map((artifact) => (
                   <ArtifactRow key={artifact.id} artifact={artifact} />
                 ))}
@@ -118,9 +118,9 @@ export default async function DashboardPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="px-0 py-5 sm:border-r sm:border-border sm:px-5 sm:last:border-r-0">
-      <div className="text-3xl font-semibold">{value}</div>
-      <div className="mt-1 text-sm text-muted-foreground">{label}</div>
+    <div className="border-b-[1.5px] border-ink/10 px-5 py-5 sm:border-b-0 sm:border-r-[1.5px] sm:last:border-r-0">
+      <div className="display text-[2rem] leading-none text-ink">{value}</div>
+      <div className="mono-label mt-2">{label}</div>
     </div>
   );
 }
@@ -130,38 +130,38 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
   const more = artifact.files.length - fileNames.length;
 
   return (
-    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50 sm:grid-cols-[1fr_8rem_8rem_8rem_4rem_4rem]">
+    <div className="group relative grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 transition-colors hover:bg-orange/[0.06] sm:grid-cols-[1fr_8rem_8rem_8rem_4rem_4rem]">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-background text-accent">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)] transition-transform group-hover:-translate-y-0.5">
           <FileCode2 className="h-5 w-5" />
         </span>
         <span className="min-w-0">
-          <span className="block truncate font-medium group-hover:text-accent">
+          <span className="block truncate font-semibold text-ink group-hover:text-cobalt">
             {artifact.title}
           </span>
           {artifact.description ? (
-            <span className="mt-1 block truncate text-xs text-muted-foreground">
+            <span className="mt-0.5 block truncate text-xs text-ink-mute">
               {artifact.description}
             </span>
           ) : null}
-          <span className="mt-1 block truncate code-font text-xs text-muted-foreground">
+          <span className="mt-0.5 block truncate code-font text-xs text-ink-mute">
             {fileNames.join(" / ")}
             {more > 0 ? ` / +${more}` : ""}
           </span>
         </span>
       </div>
-      <span className="hidden items-center gap-1.5 text-sm text-muted-foreground sm:flex">
+      <span className="hidden items-center gap-1.5 text-sm text-ink-mute sm:flex">
         <Clock3 className="h-3.5 w-3.5" />
         {formatDate(artifact.updated_at)}
       </span>
       <span className="hidden sm:block">
         {artifact.share_token ? (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-2 py-1 text-xs font-medium text-accent">
+          <span className="inline-flex items-center gap-1.5 rounded-md border-[1.5px] border-ink bg-orange/15 px-2 py-1 text-xs font-semibold text-orange-deep">
             <Globe className="h-3.5 w-3.5" />
             Shared
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-md border-[1.5px] border-ink/25 bg-paper px-2 py-1 text-xs font-semibold text-ink-mute">
             <Lock className="h-3.5 w-3.5" />
             Private
           </span>
@@ -177,7 +177,7 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
       <span className="hidden justify-center sm:flex">
         <DeleteArtifactButton id={artifact.id} title={artifact.title} />
       </span>
-      <span className="flex justify-end text-muted-foreground transition-colors group-hover:text-foreground">
+      <span className="flex justify-end text-ink-mute transition-all group-hover:translate-x-0.5 group-hover:text-cobalt">
         <ArrowRight className="h-4 w-4" />
       </span>
       <Link
@@ -191,15 +191,21 @@ function ArtifactRow({ artifact }: { artifact: Row }) {
 
 function EmptyState() {
   return (
-    <div className="relative overflow-hidden rounded-lg border border-dashed border-border bg-card p-10">
-      <div className="absolute inset-0 bg-dots opacity-55" />
+    <div className="riso-card-pop relative overflow-hidden p-10 sm:p-14">
+      <div className="halftone halftone-fade" aria-hidden="true" />
       <div className="relative max-w-xl">
-        <h2 className="text-xl font-semibold">No artifacts yet</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <span className="chip mb-4">
+          <Plus className="h-3 w-3 text-orange" />
+          empty press
+        </span>
+        <h2 className="display text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight text-ink">
+          No artifacts yet
+        </h2>
+        <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
           Start with a single HTML file or a small JSX component. The workbench
-          will keep the file list, code, preview, and sharing controls together.
+          keeps the file list, code, preview, and sharing controls together.
         </p>
-        <Link href="/new" className={buttonStyles({ size: "lg", className: "mt-6" })}>
+        <Link href="/new" className="btn-cobalt mt-7">
           <Plus className="h-4 w-4" />
           Create first artifact
         </Link>

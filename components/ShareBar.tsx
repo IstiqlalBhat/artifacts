@@ -52,20 +52,20 @@ export function ShareBar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b border-border bg-muted/40 px-4 py-2 text-sm">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card">
+    <div className="flex flex-wrap items-center gap-3 border-b-[1.5px] border-ink/12 bg-paper-deep/40 px-4 py-2.5 text-sm">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg border-[1.5px] border-ink bg-paper-soft shadow-[2px_2px_0_var(--ink)]">
           {isShared ? (
-            <Globe className="h-4 w-4 text-accent" />
+            <Globe className="h-4 w-4 text-orange-deep" />
           ) : (
-            <Lock className="h-4 w-4 text-muted-foreground" />
+            <Lock className="h-4 w-4 text-ink-mute" />
           )}
         </span>
         <span className="min-w-0">
-          <span className="block font-medium">
+          <span className="block font-semibold text-ink">
             {isShared ? "Public artifact" : "Private artifact"}
           </span>
-          <span className="block truncate text-xs text-muted-foreground">
+          <span className="block truncate text-xs text-ink-mute">
             {isShared
               ? "Anyone with the link can view the rendered artifact."
               : "Only your account can open this artifact."}
@@ -74,12 +74,12 @@ export function ShareBar({
       </div>
       <div className="ml-auto flex min-w-0 flex-wrap items-center gap-2">
         {isShared && (
-          <div className="flex min-w-0 items-center gap-1 rounded-md border border-border bg-background px-2 shadow-sm shadow-primary/5">
-            <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
+          <div className="flex min-w-0 items-center gap-1 rounded-lg border-[1.5px] border-ink/25 bg-paper-soft px-2">
+            <Link2 className="h-3.5 w-3.5 text-ink-mute" />
             <Input
               readOnly
               value={shareUrl}
-              className="h-7 w-72 max-w-[55vw] border-0 px-1 text-xs code-font shadow-none focus-visible:ring-0"
+              className="h-7 w-72 max-w-[55vw] border-0 px-1 text-xs code-font focus-visible:ring-0"
               onFocus={(e) => e.currentTarget.select()}
             />
             <Button
@@ -90,7 +90,7 @@ export function ShareBar({
               aria-label="Copy share link"
             >
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-accent" />
+                <Check className="h-3.5 w-3.5 text-orange-deep" />
               ) : (
                 <Copy className="h-3.5 w-3.5" />
               )}
@@ -99,7 +99,7 @@ export function ShareBar({
         )}
         <Button
           size="sm"
-          variant={isShared ? "outline" : "primary"}
+          variant={isShared ? "secondary" : "primary"}
           onClick={onToggle}
           disabled={pending || directoryLocked}
           title={toggleHint}
@@ -109,11 +109,7 @@ export function ShareBar({
         {confirmingDelete ? (
           <form action={deleteArtifact} className="flex items-center gap-1">
             <input type="hidden" name="id" value={artifactId} />
-            <Button
-              size="sm"
-              variant="destructive"
-              type="submit"
-            >
+            <Button size="sm" variant="destructive" type="submit">
               <Trash2 className="h-3.5 w-3.5" />
               Confirm
             </Button>

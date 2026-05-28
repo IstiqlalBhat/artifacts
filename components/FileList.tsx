@@ -21,7 +21,7 @@ export function FileList({
 }) {
   if (!files.length) {
     return (
-      <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+      <p className="px-3 py-6 text-center text-xs text-ink-mute">
         No files yet.
       </p>
     );
@@ -32,10 +32,10 @@ export function FileList({
         <li
           key={f.name}
           className={cn(
-            "group flex items-center gap-1 rounded-md text-sm",
+            "group flex items-center gap-1 rounded-md text-sm transition-colors",
             activeName === f.name
-              ? "bg-card text-foreground shadow-sm shadow-primary/5"
-              : "text-muted-foreground hover:bg-card/60",
+              ? "border-[1.5px] border-ink/15 bg-paper-soft text-ink"
+              : "border-[1.5px] border-transparent text-ink-mute hover:bg-paper-soft/70",
           )}
         >
           <button
@@ -43,17 +43,22 @@ export function FileList({
             onClick={() => onSelect(f.name)}
             className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left"
           >
-            <FileCode2 className="h-4 w-4 shrink-0 opacity-70" />
+            <FileCode2
+              className={cn(
+                "h-4 w-4 shrink-0",
+                activeName === f.name ? "text-cobalt" : "opacity-70",
+              )}
+            />
             <span className="flex-1 truncate code-font text-xs">{f.name}</span>
           </button>
           <button
             type="button"
             onClick={() => onSetEntry(f.name)}
             className={cn(
-              "mr-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-opacity",
+              "mr-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition-opacity",
               entry === f.name
-                ? "bg-accent text-accent-foreground"
-                : "opacity-0 group-hover:opacity-100 hover:bg-muted",
+                ? "border-[1.5px] border-ink bg-orange/15 text-orange-deep"
+                : "opacity-0 group-hover:opacity-100 hover:bg-paper-deep",
             )}
             title="Use as entry"
           >
@@ -62,7 +67,7 @@ export function FileList({
           <button
             type="button"
             onClick={() => onRemove(f.name)}
-            className="mr-1 rounded p-1 opacity-0 transition-opacity hover:bg-destructive/20 hover:text-destructive group-hover:opacity-100"
+            className="mr-1 rounded p-1 opacity-0 transition-opacity hover:bg-destructive/15 hover:text-destructive group-hover:opacity-100"
             aria-label={`Remove ${f.name}`}
           >
             <X className="h-3.5 w-3.5" />

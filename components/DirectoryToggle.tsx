@@ -42,16 +42,16 @@ export function DirectoryToggle({
         onChange={(event) => onChange(event.target.checked)}
         aria-label={`${checked ? "Remove" : "Add"} ${title} ${checked ? "from" : "to"} the SVS Directory`}
         aria-invalid={error ? true : undefined}
-        className="h-4 w-4 cursor-pointer accent-accent disabled:cursor-not-allowed"
+        className="h-4 w-4 cursor-pointer accent-cobalt disabled:cursor-not-allowed"
       />
       <span
         className={cn(
-          "inline-flex items-center gap-1 font-medium transition-colors",
+          "inline-flex items-center gap-1 font-semibold transition-colors",
           error
             ? "text-destructive"
             : checked
-              ? "text-accent"
-              : "text-muted-foreground",
+              ? "text-cobalt"
+              : "text-ink-mute",
         )}
       >
         {pending ? (

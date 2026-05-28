@@ -66,28 +66,28 @@ export default async function SharePage({ params }: { params: Params }) {
   });
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <header className="flex h-12 items-center justify-between border-b border-border bg-card px-4 text-sm">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <SquareDashedMousePointer className="h-4 w-4 text-accent" />
-          <span>Artifacts</span>
+    <div className="flex h-screen flex-col bg-paper">
+      <header className="flex h-14 items-center justify-between gap-3 border-b-[1.5px] border-ink/15 bg-paper px-4">
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)] transition-transform group-hover:-translate-y-0.5">
+            <SquareDashedMousePointer className="h-4 w-4" />
+          </span>
+          <span className="display text-base text-ink">Artifacts</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <span className="truncate font-medium" title={data.title}>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="truncate text-sm font-semibold text-ink" title={data.title}>
             {data.title}
           </span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            {data.kind}
-          </span>
+          <span className="chip shrink-0">{data.kind}</span>
         </div>
         <Link
           href="/signup"
-          className="text-xs text-muted-foreground hover:text-foreground"
+          className="code-font shrink-0 text-[0.7rem] uppercase tracking-[0.15em] text-ink-mute transition-colors hover:text-cobalt"
         >
           Make your own →
         </Link>
       </header>
-      <main className="flex-1 min-h-0 bg-white">
+      <main className="min-h-0 flex-1 bg-white">
         <ArtifactRenderer doc={doc} title={data.title} />
       </main>
     </div>

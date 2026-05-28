@@ -1,40 +1,64 @@
 @import "tailwindcss";
 
+/* ============================================================
+   RISOGRAPH WORKSHOP
+   Two spot inks over warm stock:
+     · cobalt  — the structural "first ink" (fills, lines, links)
+     · orange  — the fluoro "second ink" (pops, hovers, marks)
+     · ink     — the near-black key line (text + hard offsets)
+   Everything is printed: hard offset shadows, halftone dots,
+   slight misregistration, paper grain.
+   ============================================================ */
+
 :root {
-  /* Sunlit Workshop — warm honey cream + terracotta + ink */
-  --background: oklch(0.965 0.022 78);
-  --foreground: oklch(0.205 0.022 40);
-  --muted: oklch(0.925 0.022 78);
-  --muted-foreground: oklch(0.46 0.025 38);
-  --border: oklch(0.845 0.022 65);
-  --input: oklch(0.845 0.022 65);
-  --card: oklch(0.985 0.014 80);
-  --card-foreground: oklch(0.205 0.022 40);
-  --primary: oklch(0.555 0.16 38);
-  --primary-foreground: oklch(0.985 0.014 80);
-  --accent: oklch(0.555 0.16 38);
-  --accent-foreground: oklch(0.985 0.014 80);
-  --destructive: oklch(0.55 0.22 25);
-  --ring: oklch(0.555 0.16 38);
+  /* stock + inks */
+  --paper: #f4efe3;
+  --paper-soft: #fbf8f0;
+  --paper-deep: #ece1cc;
+  --ink: #17162a;
+  --ink-soft: #3a3552;
+  --ink-mute: #5b556c;
+  --hairline: #d8ccb1;
+  --cobalt: #2c3dc4;
+  --cobalt-deep: #1d2a8f;
+  --cobalt-soft: #7480e4;
+  --orange: #ff5a1f;
+  --orange-deep: #e8480c;
+
+  /* semantic tokens — drive the ui/* primitives + token utilities */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-mute);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --card: var(--paper-soft);
+  --card-foreground: var(--ink);
+  --primary: var(--cobalt);
+  --primary-foreground: #fbf8f0;
+  --accent: var(--cobalt);
+  --accent-foreground: #fbf8f0;
+  --destructive: #c32a1a;
+  --ring: var(--cobalt);
 }
 
-/* Dark-mode override kept disabled — Sunlit Workshop is light by design.
-   Map .dark to the same warm tokens so the app stays cohesive. */
+/* Risograph Workshop is light by design. Map .dark to the same tokens so
+   any stray `dark:` consumer stays on-palette instead of inverting. */
 .dark {
-  --background: oklch(0.965 0.022 78);
-  --foreground: oklch(0.205 0.022 40);
-  --muted: oklch(0.925 0.022 78);
-  --muted-foreground: oklch(0.46 0.025 38);
-  --border: oklch(0.845 0.022 65);
-  --input: oklch(0.845 0.022 65);
-  --card: oklch(0.985 0.014 80);
-  --card-foreground: oklch(0.205 0.022 40);
-  --primary: oklch(0.555 0.16 38);
-  --primary-foreground: oklch(0.985 0.014 80);
-  --accent: oklch(0.555 0.16 38);
-  --accent-foreground: oklch(0.985 0.014 80);
-  --destructive: oklch(0.6 0.22 25);
-  --ring: oklch(0.555 0.16 38);
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-mute);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --card: var(--paper-soft);
+  --card-foreground: var(--ink);
+  --primary: var(--cobalt);
+  --primary-foreground: #fbf8f0;
+  --accent: var(--cobalt);
+  --accent-foreground: #fbf8f0;
+  --destructive: #c32a1a;
+  --ring: var(--cobalt);
 }
 
 @theme inline {
@@ -52,399 +76,401 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-ring: var(--ring);
-  --font-sans: var(--font-geist-sans);
+
+  /* expose the inks directly: bg-cobalt, text-orange, border-ink, … */
+  --color-paper: var(--paper);
+  --color-paper-soft: var(--paper-soft);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-mute: var(--ink-mute);
+  --color-hairline: var(--hairline);
+  --color-cobalt: var(--cobalt);
+  --color-cobalt-deep: var(--cobalt-deep);
+  --color-cobalt-soft: var(--cobalt-soft);
+  --color-orange: var(--orange);
+  --color-orange-deep: var(--orange-deep);
+
+  --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
 }
 
-/* prefers-color-scheme: dark intentionally NOT overridden —
-   Sunlit Workshop forces light across all routes for visual cohesion. */
-
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--paper);
+  color: var(--ink);
   overflow-x: clip;
 }
 
 body {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  font-feature-settings: "cv11", "ss01";
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: color-mix(in oklch, var(--accent) 28%, transparent);
+  background: color-mix(in srgb, var(--orange) 40%, transparent);
+  color: var(--ink);
 }
+
+/* ── Type helpers ───────────────────────────────────────────── */
 
 .code-font {
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-feature-settings: "ss02", "cv01";
 }
 
-.serif-display {
-  font-family: var(--font-display), "Times New Roman", serif;
-  font-weight: 400;
-  letter-spacing: -0.018em;
-  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 0;
+.display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.022em;
 }
+
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-mute);
+}
+
+/* Misregistration: a fluoro ghost printed just behind the headline.
+   em-based so the offset scales with the type. */
+.offset-head {
+  text-shadow: 0.035em 0.04em 0 var(--orange);
+}
+.offset-head-cobalt {
+  text-shadow: 0.035em 0.04em 0 var(--cobalt);
+}
+
+.ink-underline {
+  background-image: linear-gradient(var(--orange), var(--orange));
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 100% 0.18em;
+  padding-bottom: 0.05em;
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────── */
 
 .scroll-thin::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: var(--hairline);
+  border: 3px solid var(--paper);
+  border-radius: 0;
 }
 .scroll-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.bg-grid {
-  background-image:
-    linear-gradient(to right, color-mix(in oklch, var(--border) 58%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklch, var(--border) 58%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
+/* ── Stock textures ─────────────────────────────────────────── */
 
-.bg-dots {
-  background-image: radial-gradient(color-mix(in oklch, var(--border) 70%, transparent) 1px, transparent 1px);
-  background-size: 18px 18px;
-}
-
-/* legacy hero-surface kept for any other route still using it */
-.hero-surface {
-  background:
-    linear-gradient(115deg, color-mix(in oklch, var(--foreground) 94%, black) 0%, color-mix(in oklch, var(--foreground) 82%, black) 46%, color-mix(in oklch, var(--accent) 42%, black) 100%);
-}
-
-.soft-panel {
-  background: color-mix(in oklch, var(--card) 82%, var(--muted));
-}
-
-/* ===============================================
-   Sunlit Workshop — palette + signature surface
-   =============================================== */
-
-:root {
-  --paper: #F4ECDD;
-  --paper-soft: #FAF4E5;
-  --paper-deep: #ECE0C8;
-  --sand: #E3D5B6;
-  --hairline: #D9C9A9;
-  --ink: #2A1F18;
-  --ink-soft: #3F2F23;
-  --ink-mute: #6B5747;
-  --terra: #B85F3E;
-  --terra-deep: #823A22;
-  --terra-soft: #E8A985;
-  --olive: #7A7A48;
-  --honey: #D89B5E;
-}
-
-.sunlit-page {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-}
-
-/* Warm canvas with subtle gradient + grain */
-
-.sunlit-canvas {
-  position: relative;
-  isolation: isolate;
-  background:
-    radial-gradient(60rem 40rem at 8% -10%, rgba(216, 155, 94, 0.22), transparent 60%),
-    radial-gradient(50rem 38rem at 92% 6%, rgba(184, 95, 62, 0.18), transparent 60%),
-    var(--paper);
-  color: var(--ink);
-}
-
-.sunlit-canvas-soft {
-  position: relative;
-  isolation: isolate;
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.sunlit-canvas-deep {
-  position: relative;
-  isolation: isolate;
-  background:
-    linear-gradient(180deg, var(--paper-deep) 0%, var(--paper) 100%);
-  color: var(--ink);
-}
-
-/* Hand-printed paper grain (very subtle) */
-
-.paper-grain {
+/* ink-tinted paper grain */
+.grain {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.32;
+  opacity: 0.5;
   mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.12 0 0 0 0 0.08 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.086 0 0 0 0 0.165 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Decorative hairline grid (so subtle, like graph paper) */
-
-.paper-grid {
+/* halftone dot field — the signature print screen */
+.halftone {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(42, 31, 24, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(42, 31, 24, 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 55% at 50% 50%, #000 30%, transparent 80%);
+  background-image: radial-gradient(var(--cobalt) 22%, transparent 23%);
+  background-size: 12px 12px;
+  opacity: 0.1;
+}
+.halftone-orange {
+  background-image: radial-gradient(var(--orange) 22%, transparent 23%);
+}
+.halftone-fade {
+  -webkit-mask-image: radial-gradient(ellipse 80% 62% at 50% 38%, #000 28%, transparent 80%);
+  mask-image: radial-gradient(ellipse 80% 62% at 50% 38%, #000 28%, transparent 80%);
 }
 
-/* Cards (paper on paper, with hairline) */
+/* ── Canvases ───────────────────────────────────────────────── */
 
-.paper-card {
-  background: var(--paper-soft);
-  border: 1px solid var(--hairline);
-  border-radius: 18px;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 14px 36px -22px rgba(82, 56, 30, 0.32);
-  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), border-color 320ms ease, box-shadow 320ms ease;
-}
-
-.paper-card-deep {
-  background: linear-gradient(180deg, var(--paper-soft) 0%, var(--paper-deep) 100%);
-  border: 1px solid var(--hairline);
-  border-radius: 20px;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 20px 50px -28px rgba(82, 56, 30, 0.34);
-}
-
-.tile {
+.riso-canvas {
   position: relative;
-}
-
-.tile:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in oklch, #D9C9A9 60%, #B85F3E);
-}
-
-/* Subtle warm hover ring */
-
-.tile-glow::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: radial-gradient(40% 60% at 50% 0%, rgba(184, 95, 62, 0.16), transparent 70%);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 360ms ease;
-}
-
-.tile:hover .tile-glow::after,
-.tile:focus-visible .tile-glow::after {
-  opacity: 1;
-}
-
-/* Terra accent text gradient (for the italic word in the hero) */
-
-.terra-text {
-  background-image: linear-gradient(120deg, #B85F3E 0%, #D89B5E 50%, #823A22 100%);
-  background-size: 220% 220%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Hand-drawn underline accent */
-
-.hand-underline {
-  background-image: linear-gradient(120deg, var(--terra), var(--honey));
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 100% 12%;
-  padding-bottom: 0.15em;
-}
-
-/* Buttons — sunlit workshop */
-
-.btn-terra {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 3rem;
-  padding: 0 1.4rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.005em;
-  color: var(--paper-soft);
-  background: linear-gradient(180deg, var(--terra) 0%, var(--terra-deep) 100%);
-  border: 1px solid rgba(130, 58, 34, 0.55);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 12px 30px -14px rgba(130, 58, 34, 0.55);
-  transition: transform 200ms ease, box-shadow 240ms ease, filter 240ms ease;
-  white-space: nowrap;
-}
-
-.btn-terra:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.04);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 16px 36px -14px rgba(130, 58, 34, 0.6);
-}
-
-.btn-terra:focus-visible {
-  outline: 2px solid var(--terra);
-  outline-offset: 3px;
-}
-
-.btn-paper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 3rem;
-  padding: 0 1.4rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.005em;
+  isolation: isolate;
+  background: var(--paper);
   color: var(--ink);
+}
+.riso-canvas-deep {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, var(--paper-deep) 0%, var(--paper) 100%);
+  color: var(--ink);
+}
+
+/* ── Surfaces ───────────────────────────────────────────────── */
+
+/* default card — light printy edge, used on dense surfaces */
+.riso-card {
   background: var(--paper-soft);
-  border: 1px solid var(--hairline);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 4px 14px -8px rgba(82, 56, 30, 0.18);
-  transition: transform 200ms ease, background 240ms ease, border-color 240ms ease;
-  white-space: nowrap;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border-radius: 14px;
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 9%, transparent);
 }
 
-.btn-paper:hover {
-  background: #FFFCF3;
-  border-color: color-mix(in oklch, #D9C9A9 60%, #B85F3E);
-  transform: translateY(-1px);
+/* pop card — bold two-ink registration, used on showcases/features */
+.riso-card-pop {
+  position: relative;
+  background: var(--paper-soft);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.riso-card-pop:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--orange);
 }
 
-.btn-paper:focus-visible {
-  outline: 2px solid var(--terra);
-  outline-offset: 3px;
-}
-
-/* Mono caps label */
-
-.mono-label {
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--ink-mute);
-}
-
-/* Hairline divider */
-
+/* hairline divider */
 .hairline-div {
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--hairline), transparent);
+  height: 1.5px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--ink) 0 6px,
+    transparent 6px 11px
+  );
+  opacity: 0.35;
 }
 
-/* Step badge (terracotta numbered circle) */
+/* mono chip / badge */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 1.6rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-soft);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+}
 
+/* numbered step token */
 .step-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.6rem;
+  height: 2.6rem;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--paper-soft), var(--paper-deep));
-  border: 1px solid var(--hairline);
-  color: var(--terra);
+  background: var(--cobalt);
+  color: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  box-shadow: 2.5px 2.5px 0 var(--ink);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
-/* Preview frame (the live-JSX demo card) */
+/* ── Buttons ────────────────────────────────────────────────── */
 
-.preview-frame {
-  position: relative;
-  border-radius: 18px;
-  overflow: hidden;
+.btn-cobalt,
+.btn-paper,
+.btn-orange {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.85rem;
+  padding: 0 1.3rem;
+  border-radius: 11px;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border: 1.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 160ms ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-cobalt {
+  color: var(--paper-soft);
+  background: var(--cobalt);
+}
+.btn-cobalt:hover {
+  background: var(--cobalt-deep);
+  transform: translate(-1px, -1px);
+  box-shadow: 4.5px 4.5px 0 var(--ink);
+}
+.btn-orange {
+  color: var(--ink);
+  background: var(--orange);
+}
+.btn-orange:hover {
+  background: var(--orange-deep);
+  transform: translate(-1px, -1px);
+  box-shadow: 4.5px 4.5px 0 var(--ink);
+}
+.btn-paper {
+  color: var(--ink);
   background: var(--paper-soft);
-  border: 1px solid var(--hairline);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 30px 80px -30px rgba(82, 56, 30, 0.4);
+}
+.btn-paper:hover {
+  background: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 4.5px 4.5px 0 var(--orange);
+}
+.btn-cobalt:active,
+.btn-paper:active,
+.btn-orange:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.btn-cobalt:focus-visible,
+.btn-paper:focus-visible,
+.btn-orange:focus-visible {
+  outline: 2.5px solid var(--orange);
+  outline-offset: 2px;
 }
 
-.preview-frame::before {
-  content: "";
+/* ── Print-proof preview mount ──────────────────────────────── */
+
+.proof {
+  position: relative;
+  padding: 16px;
+  background: var(--paper-deep);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.proof-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 0.25rem 0.6rem;
+}
+.proof-screen {
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  background: #fff;
+}
+/* corner registration brackets */
+.crop {
   position: absolute;
-  inset: -1px;
-  border-radius: 18px;
-  padding: 1px;
-  background: linear-gradient(140deg, rgba(184, 95, 62, 0.55), rgba(216, 155, 94, 0.35) 45%, transparent 75%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--ink);
   pointer-events: none;
-  opacity: 0.85;
+  z-index: 2;
+}
+.crop-tl {
+  top: 5px;
+  left: 5px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.crop-tr {
+  top: 5px;
+  right: 5px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.crop-bl {
+  bottom: 5px;
+  left: 5px;
+  border-right: 0;
+  border-top: 0;
+}
+.crop-br {
+  bottom: 5px;
+  right: 5px;
+  border-left: 0;
+  border-top: 0;
 }
 
-.preview-scan {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent 0%, rgba(216, 155, 94, 0.16) 50%, transparent 100%);
-  height: 30%;
-  animation: scan-line 7s ease-in-out infinite;
+/* live indicator dot */
+.live-dot {
+  position: relative;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--orange);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 70%, transparent);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 65%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--orange) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 0%, transparent);
+  }
 }
 
-@keyframes scan-line {
-  0% { transform: translateY(-110%); opacity: 0; }
-  18%, 82% { opacity: 0.6; }
-  100% { transform: translateY(360%); opacity: 0; }
-}
-
-/* Entry animations */
+/* ── Entry animations ───────────────────────────────────────── */
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
-
 .animate-rise-in {
-  animation: rise-in 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
 .animate-float-slow {
   animation: float-slow 7s ease-in-out infinite;
 }
-
-.motion-delay-1 { animation-delay: 80ms; }
-.motion-delay-2 { animation-delay: 180ms; }
-.motion-delay-3 { animation-delay: 280ms; }
-.motion-delay-4 { animation-delay: 380ms; }
-.motion-delay-5 { animation-delay: 500ms; }
-
-/* Header sits over warm cream tokens now — no per-page overrides needed.
-   The default `bg-background/90` token resolves to warm cream globally. */
-
-/* Reduced motion overrides */
+.motion-delay-1 {
+  animation-delay: 80ms;
+}
+.motion-delay-2 {
+  animation-delay: 170ms;
+}
+.motion-delay-3 {
+  animation-delay: 260ms;
+}
+.motion-delay-4 {
+  animation-delay: 360ms;
+}
+.motion-delay-5 {
+  animation-delay: 480ms;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

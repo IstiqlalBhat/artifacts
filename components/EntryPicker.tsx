@@ -13,16 +13,16 @@ type Props = {
 
 export function EntryPicker({ pending, busy, error, onPick, onCancel }: Props) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
-      <div className="w-[min(30rem,100%)] rounded-lg border border-border bg-card p-6 shadow-xl shadow-primary/10">
-        <h2 className="text-base font-semibold">Pick the entry file</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/35 p-4 backdrop-blur-sm">
+      <div className="riso-card-pop w-[min(30rem,100%)] p-6">
+        <h2 className="display text-lg text-ink">Pick the entry file</h2>
+        <p className="mt-1 text-xs text-ink-mute">
           {pending.candidates.length}{" "}
-          {pending.kind === "jsx" ? "JSX/TSX" : "HTML"} files were found. The
-          one you pick runs first in the preview.
+          {pending.kind === "jsx" ? "JSX/TSX" : "HTML"} files were found. The one
+          you pick runs first in the preview.
         </p>
         {error && (
-          <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          <div className="mt-3 rounded-lg border-[1.5px] border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
             {error}
           </div>
         )}
@@ -33,13 +33,13 @@ export function EntryPicker({ pending, busy, error, onPick, onCancel }: Props) {
                 type="button"
                 onClick={() => onPick(f.name)}
                 disabled={busy}
-                className="group flex w-full items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-left text-sm transition-colors hover:border-accent/40 hover:bg-accent/5 disabled:cursor-not-allowed disabled:opacity-60"
+                className="group flex w-full items-center gap-2 rounded-lg border-[1.5px] border-ink/25 bg-paper-soft px-3 py-2 text-left text-sm transition-colors hover:border-ink hover:bg-orange/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <FileCode2 className="h-3.5 w-3.5 shrink-0 text-accent" />
-                <span className="code-font min-w-0 flex-1 truncate">
+                <FileCode2 className="h-3.5 w-3.5 shrink-0 text-cobalt" />
+                <span className="code-font min-w-0 flex-1 truncate text-ink">
                   {f.name}
                 </span>
-                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-accent" />
+                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ink-mute transition-colors group-hover:text-orange-deep" />
               </button>
             </li>
           ))}
@@ -49,7 +49,7 @@ export function EntryPicker({ pending, busy, error, onPick, onCancel }: Props) {
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="rounded-md px-2 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+            className="rounded-md px-2 py-1 text-ink-mute transition-colors hover:bg-paper-deep hover:text-ink disabled:opacity-60"
           >
             Cancel
           </button>
@@ -57,12 +57,12 @@ export function EntryPicker({ pending, busy, error, onPick, onCancel }: Props) {
             type="button"
             onClick={() => onPick(null)}
             disabled={busy}
-            className="rounded-md px-2 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+            className="rounded-md px-2 py-1 font-semibold text-ink-mute transition-colors hover:bg-paper-deep hover:text-ink disabled:opacity-60"
           >
             {busy ? (
               <span className="inline-flex items-center gap-1.5">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Saving...
+                Saving…
               </span>
             ) : (
               "Decide later"

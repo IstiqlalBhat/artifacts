@@ -352,9 +352,17 @@ export function ArtifactEditor(props: Props) {
     });
   };
 
+  const segBtn = (selected: boolean) =>
+    cn(
+      "flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition-colors",
+      selected
+        ? "bg-cobalt text-paper-soft"
+        : "text-ink-mute hover:bg-paper-deep hover:text-ink",
+    );
+
   return (
     <div
-      className="flex h-full flex-col bg-background"
+      className="flex h-full flex-col bg-paper"
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -362,7 +370,7 @@ export function ArtifactEditor(props: Props) {
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
     >
-      <div className="border-b border-border bg-card/95 px-3 py-3 shadow-sm shadow-primary/5">
+      <div className="border-b-[1.5px] border-ink/15 bg-paper/95 px-3 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex min-w-[14rem] flex-1 flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -370,9 +378,9 @@ export function ArtifactEditor(props: Props) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title"
-                className="h-9 max-w-md border-0 bg-muted/60 text-base font-semibold shadow-none focus-visible:ring-1"
+                className="h-9 max-w-md border-0 bg-paper-deep/55 text-base font-bold focus-visible:ring-1"
               />
-              <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">
+              <span className="hidden whitespace-nowrap code-font text-xs text-ink-mute sm:inline">
                 {files.length} file{files.length === 1 ? "" : "s"} /{" "}
                 {kind === "jsx" ? "React" : "HTML"}
               </span>
@@ -383,23 +391,18 @@ export function ArtifactEditor(props: Props) {
               placeholder="Description (required, min 10 chars) — shown on the dashboard and in the SVS Directory"
               aria-required
               className={cn(
-                "h-8 max-w-2xl border-0 bg-muted/30 text-xs shadow-none focus-visible:ring-1",
+                "h-8 max-w-2xl border-0 bg-paper-deep/30 text-xs focus-visible:ring-1",
                 descriptionInvalid && "ring-1 ring-destructive/40",
               )}
             />
           </div>
 
-          <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5 text-xs shadow-sm shadow-primary/5">
+          <div className="flex items-center gap-1 rounded-lg border-[1.5px] border-ink/25 bg-paper-soft p-0.5">
             <button
               type="button"
               onClick={() => setTab("code")}
               aria-pressed={tab === "code"}
-              className={cn(
-                "flex h-8 items-center gap-1.5 rounded px-2.5 transition-colors",
-                tab === "code"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
+              className={segBtn(tab === "code")}
             >
               <Code2 className="h-3.5 w-3.5" />
               Code
@@ -408,12 +411,7 @@ export function ArtifactEditor(props: Props) {
               type="button"
               onClick={() => setTab("split")}
               aria-pressed={tab === "split"}
-              className={cn(
-                "flex h-8 items-center rounded px-2.5 transition-colors",
-                tab === "split"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
+              className={segBtn(tab === "split")}
             >
               Split
             </button>
@@ -421,12 +419,7 @@ export function ArtifactEditor(props: Props) {
               type="button"
               onClick={() => setTab("preview")}
               aria-pressed={tab === "preview"}
-              className={cn(
-                "flex h-8 items-center gap-1.5 rounded px-2.5 transition-colors",
-                tab === "preview"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
+              className={segBtn(tab === "preview")}
             >
               <Eye className="h-3.5 w-3.5" />
               Preview
@@ -435,12 +428,12 @@ export function ArtifactEditor(props: Props) {
 
           <div className="ml-auto flex items-center gap-2">
             {errorMsg && (
-              <span className="max-w-64 truncate text-xs text-destructive">
+              <span className="max-w-64 truncate text-xs font-medium text-destructive">
                 {errorMsg}
               </span>
             )}
             {!errorMsg && validationHint && (
-              <span className="hidden max-w-64 truncate text-xs text-muted-foreground sm:inline">
+              <span className="hidden max-w-64 truncate text-xs text-ink-mute sm:inline">
                 {validationHint}
               </span>
             )}
@@ -449,10 +442,10 @@ export function ArtifactEditor(props: Props) {
               onClick={() => setInDirectory((v) => !v)}
               aria-pressed={inDirectory}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors",
+                "inline-flex h-8 items-center gap-1.5 rounded-md border-[1.5px] px-3 text-xs font-semibold transition-colors",
                 inDirectory
-                  ? "border-accent/40 bg-accent/10 text-accent"
-                  : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+                  ? "border-ink bg-orange/15 text-orange-deep"
+                  : "border-ink/25 bg-paper-soft text-ink-mute hover:bg-paper-deep hover:text-ink",
               )}
             >
               <Globe2 className="h-3.5 w-3.5" />
@@ -469,7 +462,7 @@ export function ArtifactEditor(props: Props) {
                   e.target.value = "";
                 }}
               />
-              <span className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-xs font-medium shadow-sm shadow-primary/5 transition-colors hover:bg-muted">
+              <span className="inline-flex h-8 items-center gap-1.5 rounded-md border-[1.5px] border-ink/25 bg-paper-soft px-3 text-xs font-semibold transition-colors hover:bg-paper-deep">
                 <Upload className="h-3.5 w-3.5" />
                 Upload
               </span>
@@ -496,7 +489,7 @@ export function ArtifactEditor(props: Props) {
         </div>
       </div>
 
-      <div className="border-b border-border bg-muted/40 md:hidden">
+      <div className="border-b-[1.5px] border-ink/12 bg-paper-deep/40 md:hidden">
         <div className="scroll-thin flex items-center gap-2 overflow-x-auto px-3 py-2">
           {files.map((file) => (
             <button
@@ -504,10 +497,10 @@ export function ArtifactEditor(props: Props) {
               key={file.name}
               onClick={() => setActiveName(file.name)}
               className={cn(
-                "flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs transition-colors",
+                "flex h-8 shrink-0 items-center gap-1.5 rounded-md border-[1.5px] px-2.5 text-xs transition-colors",
                 activeName === file.name
-                  ? "border-accent/40 bg-accent/10 text-accent"
-                  : "border-border bg-card text-muted-foreground",
+                  ? "border-ink bg-orange/12 text-orange-deep"
+                  : "border-ink/20 bg-paper-soft text-ink-mute",
               )}
             >
               <FileCode2 className="h-3.5 w-3.5" />
@@ -517,7 +510,7 @@ export function ArtifactEditor(props: Props) {
           <button
             type="button"
             onClick={insertNewFile}
-            className="flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground"
+            className="flex h-8 shrink-0 items-center gap-1.5 rounded-md border-[1.5px] border-ink/20 bg-paper-soft px-2.5 text-xs text-ink-mute"
           >
             <FilePlus2 className="h-3.5 w-3.5" />
             New file
@@ -533,13 +526,13 @@ export function ArtifactEditor(props: Props) {
             : "grid-rows-[minmax(0,1fr)]",
         )}
       >
-        <aside className="hidden border-r border-border bg-muted/40 md:flex md:flex-col">
-          <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs font-medium text-muted-foreground">
+        <aside className="hidden border-r-[1.5px] border-ink/12 bg-paper-deep/40 md:flex md:flex-col">
+          <div className="mono-label flex items-center justify-between border-b-[1.5px] border-ink/12 px-3 py-2.5">
             Files
             <button
               type="button"
               onClick={insertNewFile}
-              className="rounded p-1 transition-colors hover:bg-muted"
+              className="rounded p-1 text-ink-mute transition-colors hover:bg-paper-deep hover:text-cobalt"
               aria-label="New file"
             >
               <FilePlus2 className="h-3.5 w-3.5" />
@@ -555,21 +548,21 @@ export function ArtifactEditor(props: Props) {
               onSetEntry={(name) => setEntry(name)}
             />
           </div>
-          <p className="border-t border-border px-3 py-2 text-[11px] leading-snug text-muted-foreground">
+          <p className="border-t-[1.5px] border-ink/12 px-3 py-2 text-[11px] leading-snug text-ink-mute">
             Drag files anywhere. Set an entry file to control the first run.
           </p>
         </aside>
 
         <section
           className={cn(
-            "flex min-h-0 flex-col border-r border-border bg-card",
+            "flex min-h-0 flex-col border-r-[1.5px] border-ink/12 bg-paper-soft",
             tab === "preview" && "hidden",
             tab === "code" && "md:col-span-2",
           )}
         >
-          <div className="flex h-9 items-center gap-2 border-b border-border bg-muted/40 px-3 text-xs">
-            <FileCode2 className="h-3.5 w-3.5 text-accent" />
-            <span className="code-font truncate">
+          <div className="flex h-9 items-center gap-2 border-b-[1.5px] border-ink/12 bg-paper-deep/50 px-3 text-xs">
+            <FileCode2 className="h-3.5 w-3.5 text-cobalt" />
+            <span className="code-font truncate text-ink">
               {activeFile?.name ?? "No file"}
             </span>
             {activeFile && (
@@ -577,10 +570,10 @@ export function ArtifactEditor(props: Props) {
                 type="button"
                 onClick={() => setEntry(activeFile.name)}
                 className={cn(
-                  "ml-auto rounded-md border px-2 py-0.5 text-[11px] font-medium transition-colors",
+                  "ml-auto rounded-md border-[1.5px] px-2 py-0.5 text-[11px] font-semibold transition-colors",
                   entry === activeFile.name
-                    ? "border-accent/40 bg-accent/10 text-accent"
-                    : "border-border bg-background text-muted-foreground hover:text-foreground",
+                    ? "border-ink bg-orange/15 text-orange-deep"
+                    : "border-ink/25 bg-paper-soft text-ink-mute hover:text-ink",
                 )}
               >
                 {entry === activeFile.name ? "Entry file" : "Set as entry"}
@@ -600,7 +593,7 @@ export function ArtifactEditor(props: Props) {
             }
             onPaste={onPaste}
             spellCheck={false}
-            className="min-h-0 flex-1 resize-none rounded-none border-0 bg-neutral-950 px-4 py-3 text-[13px] leading-6 text-neutral-100 shadow-none placeholder:text-neutral-500 focus-visible:ring-0"
+            className="min-h-0 flex-1 resize-none rounded-none border-0 bg-ink px-4 py-3 text-[13px] leading-6 text-paper shadow-none placeholder:text-paper/35 focus-visible:ring-0"
             placeholder="// Paste or type your code here"
           />
         </section>
@@ -612,17 +605,17 @@ export function ArtifactEditor(props: Props) {
             tab === "preview" && "md:col-span-2",
           )}
         >
-          <div className="flex h-9 items-center justify-between border-b border-border bg-card px-3 text-xs text-muted-foreground">
+          <div className="flex h-9 items-center justify-between border-b-[1.5px] border-ink/12 bg-paper-soft px-3 text-xs text-ink-mute">
             <span className="flex items-center gap-2">
-              <Eye className="h-3.5 w-3.5 text-accent" />
+              <Eye className="h-3.5 w-3.5 text-cobalt" />
               Preview
             </span>
-            <span className="hidden sm:inline">Sandboxed iframe</span>
+            <span className="mono-label hidden sm:inline">Sandboxed iframe</span>
           </div>
           <div className="relative min-h-0 flex-1">
             <ArtifactRenderer doc={previewDoc} />
             {dragOver && (
-              <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-lg border-2 border-dashed border-accent bg-accent/10 text-sm font-medium text-accent">
+              <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-lg border-2 border-dashed border-orange bg-orange/10 text-sm font-bold text-orange-deep">
                 Drop files to add them to this artifact
               </div>
             )}

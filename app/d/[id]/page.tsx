@@ -42,35 +42,35 @@ export default async function DirectoryArtifactPage({
   });
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen flex-col bg-paper">
       <Header />
-      <div className="border-b border-border bg-card/95 px-4 py-3 sm:px-6">
+      <div className="border-b-[1.5px] border-ink/12 bg-paper-deep/40 px-4 py-3 sm:px-6">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3">
           <Link
             href="/directory"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            className="code-font inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.15em] text-ink-mute transition-colors hover:text-cobalt"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             SVS Directory
           </Link>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-sm font-semibold">{data.title}</h1>
+            <h1 className="truncate text-sm font-semibold text-ink">
+              {data.title}
+            </h1>
             {data.description ? (
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="truncate text-xs text-ink-mute">
                 {data.description}
               </p>
             ) : null}
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 text-xs text-ink-mute">
             <User className="h-3.5 w-3.5" />
             {data.owner_email ?? "Unknown"}
           </span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            {data.kind}
-          </span>
+          <span className="chip">{data.kind}</span>
         </div>
       </div>
-      <main className="flex-1 min-h-0 bg-white">
+      <main className="min-h-0 flex-1 bg-white">
         <ArtifactRenderer doc={doc} title={data.title} />
       </main>
     </div>
