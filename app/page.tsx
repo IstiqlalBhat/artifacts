@@ -197,7 +197,7 @@ export default async function Home() {
             <div className="min-w-0">
               <div className="animate-rise-in mono-label flex items-center gap-3">
                 <span className="inline-block h-px w-8 bg-[var(--terra)]/60" aria-hidden="true" />
-                Workbench · No. 01 · Suncoast Studio
+                Workbench · No. 01 · Suncoast Venture Studio
               </div>
 
               <h1 className="animate-rise-in motion-delay-1 serif-display mt-5 text-balance text-[clamp(2.6rem,9vw,6.25rem)] leading-[0.95] text-[var(--ink)] sm:leading-[0.92]">
@@ -476,7 +476,7 @@ export default async function Home() {
             </span>
           </div>
           <span className="text-[0.78rem] text-[var(--ink-mute)]">
-            Built by Suncoast Studio
+            Built by Suncoast Venture Studio
           </span>
         </div>
       </footer>
