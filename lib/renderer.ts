@@ -437,6 +437,92 @@ function inlineLinks(
   return out;
 }
 
+// Static inlining only sees asset references that exist literally in the
+// markup. Artifacts frequently build URLs at runtime (e.g. `<image href=
+// "${base}${name}">` assembled in a <script>), and those elements never pass
+// through inlineLinks. This runtime shim — injected before any user script —
+// holds every bundled image as a data: URL and rewrites src/href/xlink:href/
+// data/srcset on elements as they are added to the DOM, so dynamically created
+// references resolve too. It complements (does not replace) static inlining.
+const ASSET_RUNTIME_SHIM = `(function(){
+  var A = window.__ARTIFACT_ASSETS__ || {};
+  var XLINK = "http://www.w3.org/1999/xlink";
+  function strip(u){ return String(u).replace(/[?#].*$/, "").replace(/^\\.?\\/+/, ""); }
+  function look(v){
+    if (!v) return null;
+    if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/|#|data:)/i.test(v)) return null;
+    if (Object.prototype.hasOwnProperty.call(A, v)) return A[v];
+    var s = strip(v);
+    return Object.prototype.hasOwnProperty.call(A, s) ? A[s] : null;
+  }
+  var ATTRS = ["src", "href", "data", "poster"];
+  function fix(el){
+    if (!el || el.nodeType !== 1) return;
+    for (var i = 0; i < ATTRS.length; i++){
+      var a = ATTRS[i];
+      if (el.hasAttribute(a)){ var d = look(el.getAttribute(a)); if (d) el.setAttribute(a, d); }
+    }
+    if (el.getAttributeNS){
+      var xv = el.getAttributeNS(XLINK, "href");
+      if (xv){ var dx = look(xv); if (dx) el.setAttributeNS(XLINK, "href", dx); }
+    }
+    if (el.hasAttribute("srcset")){
+      var ss = el.getAttribute("srcset").split(",").map(function(p){
+        var seg = p.trim(); if (!seg) return p;
+        var sp = seg.indexOf(" ");
+        var url = sp < 0 ? seg : seg.slice(0, sp);
+        var desc = sp < 0 ? "" : seg.slice(sp);
+        var d = look(url); return d ? d + desc : p;
+      }).join(",");
+      el.setAttribute("srcset", ss);
+    }
+  }
+  function walk(n){
+    fix(n);
+    if (n.querySelectorAll){ var e = n.querySelectorAll("*"); for (var i = 0; i < e.length; i++) fix(e[i]); }
+  }
+  try {
+    var mo = new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++){
+        var m = ms[i];
+        if (m.type === "attributes") fix(m.target);
+        else for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);
+      }
+    });
+    mo.observe(document.documentElement, { subtree: true, childList: true, attributes: true });
+  } catch (e) {}
+  function init(){ walk(document.documentElement); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  init();
+})();`;
+
+function buildAssetRuntimeScript(files: ArtifactFile[]): string {
+  const map: Record<string, string> = {};
+  for (const f of files) {
+    if (!isImagePath(f.name)) continue;
+    const url = dataUrlFor(f);
+    map[f.name] = url;
+    map[normalizePath(f.name)] = url;
+  }
+  if (Object.keys(map).length === 0) return "";
+  const body = `window.__ARTIFACT_ASSETS__=${JSON.stringify(map)};\n${ASSET_RUNTIME_SHIM}`;
+  return `<script>${scriptSafe(body)}</script>`;
+}
+
+// Inject the runtime shim as the first script in the document so it installs
+// its observer before any user script runs and creates asset-bearing nodes.
+function injectAssetRuntime(html: string, files: ArtifactFile[]): string {
+  const script = buildAssetRuntimeScript(files);
+  if (!script) return html;
+  if (/<head\b[^>]*>/i.test(html)) {
+    return html.replace(/(<head\b[^>]*>)/i, `$1\n${script}`);
+  }
+  if (/<html\b[^>]*>/i.test(html)) {
+    return html.replace(/(<html\b[^>]*>)/i, `$1\n${script}`);
+  }
+  return `${script}\n${html}`;
+}
+
 export function buildHtmlDocument(
   files: ArtifactFile[],
   entry?: string | null,
@@ -447,12 +533,13 @@ export function buildHtmlDocument(
     files.find((f) => isHtml(f.name));
 
   if (indexFile) {
-    return inlineLinks(
+    const inlined = inlineLinks(
       indexFile.content,
       files,
       new Set([indexFile.name]),
       indexFile.name,
     );
+    return injectAssetRuntime(inlined, files);
   }
 
   // No HTML — synthesize a basic document from css + js
