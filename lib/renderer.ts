@@ -120,6 +120,7 @@ function inlineCssUrls(
   css: string,
   files: ArtifactFile[],
   baseFileName?: string,
+  quote = '"',
 ): string {
   return css.replace(
     /url\(\s*(["']?)([^"')]+)\1\s*\)/gi,
@@ -127,7 +128,7 @@ function inlineCssUrls(
       if (isExternalReference(raw)) return match;
       const file = matchFile(files, raw, baseFileName);
       if (!file) return match;
-      return `url("${dataUrlFor(file)}")`;
+      return `url(${quote}${dataUrlFor(file)}${quote})`;
     },
   );
 }
@@ -215,6 +216,74 @@ function transformModuleSource(
     );
 }
 
+// Rewrite each candidate in a srcset list (e.g. `a.svg 1x, b.svg 2x`) to a
+// data: URL. data: URLs never contain a raw comma or space (encodeURIComponent
+// percent-encodes both, and base64 has neither), so splitting on commas and
+// spaces stays unambiguous after substitution.
+function inlineSrcset(
+  value: string,
+  files: ArtifactFile[],
+  baseFileName?: string,
+): string {
+  return value
+    .split(",")
+    .map((part) => {
+      const seg = part.trim();
+      if (!seg) return part;
+      const sp = seg.indexOf(" ");
+      const url = sp === -1 ? seg : seg.slice(0, sp);
+      const desc = sp === -1 ? "" : seg.slice(sp);
+      if (isExternalReference(url)) return part;
+      if (!isImagePath(stripQueryHash(url))) return part;
+      const file = matchFile(files, url, baseFileName);
+      if (!file) return part;
+      return `${dataUrlFor(file)}${desc}`;
+    })
+    .join(",");
+}
+
+// SVG sprite references (<use href="icons.svg#star">) can't be turned into a
+// data: URL the way <img> can — Safari refuses external <use> targets entirely,
+// even as data: URLs. Instead we inline each referenced sprite file once into a
+// hidden container and rewrite the <use> to a same-document fragment, which
+// every browser resolves locally.
+function inlineUseSprites(
+  html: string,
+  files: ArtifactFile[],
+  baseFileName?: string,
+): string {
+  const sprites = new Map<string, ArtifactFile>();
+  let out = html.replace(
+    /<use\b([^>]*?)\b(xlink:href|href)=["']([^"']+)["']([^>]*?)(\/?)>/gi,
+    (match, pre: string, attr: string, ref: string, post: string, slash: string) => {
+      if (isExternalReference(ref)) return match;
+      const hashIdx = ref.indexOf("#");
+      const fileRef = hashIdx === -1 ? ref : ref.slice(0, hashIdx);
+      const frag = hashIdx === -1 ? "" : ref.slice(hashIdx);
+      // Already a same-document reference (e.g. href="#star") — leave it.
+      if (fileRef === "") return match;
+      if (!isImagePath(stripQueryHash(fileRef))) return match;
+      const file = matchFile(files, fileRef, baseFileName);
+      if (!file) return match;
+      if (frag === "") {
+        // Whole-file reference with no fragment: data: URL is fine here.
+        return `<use${pre}${attr}="${dataUrlFor(file)}"${post}${slash}>`;
+      }
+      sprites.set(file.name, file);
+      return `<use${pre}${attr}="${frag}"${post}${slash}>`;
+    },
+  );
+  if (sprites.size === 0) return out;
+  const blob = [...sprites.values()].map((f) => f.content).join("\n");
+  const container = `<div aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">${blob}</div>`;
+  if (/<body\b[^>]*>/i.test(out)) {
+    out = out.replace(/(<body\b[^>]*>)/i, `$1\n${container}`);
+  } else {
+    out = container + out;
+  }
+  return out;
+}
+
 function inlineLinks(
   html: string,
   files: ArtifactFile[],
@@ -277,6 +346,26 @@ function inlineLinks(
       return `<iframe${pre}srcdoc="${escapeAttr(inner)}"${post}>`;
     },
   );
+  // Inline url() references inside embedded <style> blocks. (External .css
+  // files are handled above; without this, an inline <style> with
+  // background:url(logo.svg) keeps a relative URL that 404s in srcdoc.)
+  out = out.replace(
+    /<style\b([^>]*)>([\s\S]*?)<\/style>/gi,
+    (_match, attrs: string, css: string) =>
+      `<style${attrs}>${inlineCssUrls(css, files, baseFileName)}</style>`,
+  );
+  // Inline url() references inside inline style="" attributes. Gate on a
+  // preceding space so we match real attributes, not `el.style=` in scripts,
+  // and on the presence of url( so plain styles are left untouched. The data:
+  // URL is wrapped in the opposite quote to keep the attribute well-formed.
+  out = out.replace(
+    /(\s)style=(["'])((?:(?!\2).)*)\2/gi,
+    (match, sp: string, q: string, css: string) => {
+      if (!/url\(/i.test(css)) return match;
+      const altQuote = q === '"' ? "'" : '"';
+      return `${sp}style=${q}${inlineCssUrls(css, files, baseFileName, altQuote)}${q}`;
+    },
+  );
   // Inline <img>, <source>, and <link rel="icon"> references to bundled image
   // files as data: URLs. Without this, the iframe srcdoc resolves the relative
   // src against the parent page and gets a 404.
@@ -298,14 +387,53 @@ function inlineLinks(
       return `<source${pre}src="${dataUrlFor(file)}"${post}>`;
     },
   );
+  // <object data> / <embed src> can point at an SVG document directly.
   out = out.replace(
-    /<link\b([^>]*?\brel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]*?)\bhref=["']([^"']+)["']([^>]*)>/gi,
+    /<object\b([^>]*?)\bdata=["']([^"']+)["']([^>]*)>/gi,
+    (match, pre: string, data: string, post: string) => {
+      if (!isImagePath(stripQueryHash(data))) return match;
+      const file = matchFile(files, data, baseFileName);
+      if (!file) return match;
+      return `<object${pre}data="${dataUrlFor(file)}"${post}>`;
+    },
+  );
+  out = out.replace(
+    /<embed\b([^>]*?)\bsrc=["']([^"']+)["']([^>]*)>/gi,
+    (match, pre: string, src: string, post: string) => {
+      if (!isImagePath(stripQueryHash(src))) return match;
+      const file = matchFile(files, src, baseFileName);
+      if (!file) return match;
+      return `<embed${pre}src="${dataUrlFor(file)}"${post}>`;
+    },
+  );
+  // SVG's <image> element references its source via href / xlink:href.
+  out = out.replace(
+    /<image\b([^>]*?)\b(xlink:href|href)=["']([^"']+)["']([^>]*?)(\/?)>/gi,
+    (match, pre: string, attr: string, ref: string, post: string, slash: string) => {
+      if (!isImagePath(stripQueryHash(ref))) return match;
+      const file = matchFile(files, ref, baseFileName);
+      if (!file) return match;
+      return `<image${pre}${attr}="${dataUrlFor(file)}"${post}${slash}>`;
+    },
+  );
+  // Responsive srcset on <img>/<source>. Gate on a preceding space to avoid
+  // matching srcset-like text in scripts.
+  out = out.replace(
+    /(\s)srcset=(["'])((?:(?!\2).)*)\2/gi,
+    (_match, sp: string, q: string, value: string) =>
+      `${sp}srcset=${q}${inlineSrcset(value, files, baseFileName)}${q}`,
+  );
+  out = out.replace(
+    /<link\b([^>]*?\brel=["'](?:icon|shortcut icon|apple-touch-icon|mask-icon)["'][^>]*?)\bhref=["']([^"']+)["']([^>]*)>/gi,
     (match, pre: string, href: string, post: string) => {
       const file = matchFile(files, href, baseFileName);
       if (!file) return match;
       return `<link${pre}href="${dataUrlFor(file)}"${post}>`;
     },
   );
+  // SVG sprite <use> references — inline the sprite and rewrite to a
+  // same-document fragment (done last so the <use> markup is otherwise final).
+  out = inlineUseSprites(out, files, baseFileName);
   return out;
 }
 
