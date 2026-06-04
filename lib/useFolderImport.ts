@@ -13,6 +13,20 @@ const SUPPORTED =
   /\.(html?|css|m?js|jsx|tsx|ts|json|png|jpe?g|gif|webp|avif|svg|ico|bmp)$/i;
 const BINARY = /\.(png|jpe?g|gif|webp|avif|ico|bmp)$/i;
 const MAX_FILES = 80;
+// Vendor/build directories that are never part of an artifact. Skipped during
+// the walk itself — a dropped project with node_modules would otherwise spend
+// minutes reading thousands of entries before the file cap even runs.
+const IGNORED_DIRS = new Set([
+  "node_modules",
+  ".git",
+  ".next",
+  ".cache",
+  "dist",
+  "build",
+  "out",
+  "coverage",
+  "vendor",
+]);
 
 const baseName = (path: string) => path.split("/").pop() ?? path;
 const isRoot = (path: string) => !path.includes("/");
@@ -81,6 +95,7 @@ async function walk(
     return [{ path: prefix + entry.name, file }];
   }
   if (entry.isDirectory) {
+    if (IGNORED_DIRS.has(entry.name)) return [];
     const reader = (entry as FileSystemDirectoryEntry).createReader();
     const all: FileSystemEntry[] = [];
     // readEntries returns at most ~100 per call — loop until empty.
