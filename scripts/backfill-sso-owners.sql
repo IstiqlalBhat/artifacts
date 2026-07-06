@@ -17,9 +17,9 @@ set owner = v.new_owner::uuid,
     owner_email = v.new_email
 from auth.users old_u,
      (values
-        ('istiqlal1234@gmail.com', '<UUID-ISTIQLAL>', 'istiqlal@suncoast.studio'),
-        ('sean@suncoast.studio',   '<UUID-SEAN>',     'sean@suncoast.studio'),
-        ('travis@suncoast.studio', '<UUID-TRAVIS>',   'travis@suncoast.studio')
+        ('istiqlal1234@gmail.com', '738122a5-3810-4a36-bf61-e3ede9f3ce3a', 'istiqlal@suncoast.studio'),
+        ('sean@suncoast.studio',   '9095e55f-4012-4466-909e-61cb8e317016', 'sean@suncoast.studio'),
+        ('travis@suncoast.studio', 'ece8182d-47e1-4075-8e81-583fd159442c', 'travis@suncoast.studio')
      ) as v(old_email, new_owner, new_email)
 where old_u.email = v.old_email
   and a.owner = old_u.id;
