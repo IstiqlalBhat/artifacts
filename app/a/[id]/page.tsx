@@ -1,19 +1,17 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ArtifactEditor } from "@/components/ArtifactEditor";
 import { ShareBar } from "@/components/ShareBar";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
+import { supabaseData } from "@/lib/supabase/data";
 import type { ArtifactFile, ArtifactKind } from "@/lib/renderer";
 
 type Params = Promise<{ id: string }>;
 
 export default async function ArtifactPage({ params }: { params: Params }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?redirect=/a/${id}`);
+  const user = await requireUser(`/a/${id}`);
+  const supabase = supabaseData();
 
   const { data, error } = await supabase
     .from("artifacts")
