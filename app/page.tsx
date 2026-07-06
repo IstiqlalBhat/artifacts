@@ -170,8 +170,10 @@ export default async function Home() {
 
   const primaryHref = user ? "/new" : hubLoginUrl("/dashboard");
   const primaryLabel = user ? "Create artifact" : "Sign in";
-  const secondaryHref = user ? "/dashboard" : hubLoginUrl("/dashboard");
-  const secondaryLabel = user ? "Open library" : "Sign in";
+  // The secondary CTA only renders for signed-in users, so these have no
+  // signed-out branch.
+  const secondaryHref = "/dashboard";
+  const secondaryLabel = "Open library";
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">

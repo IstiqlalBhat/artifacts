@@ -59,6 +59,11 @@ Supabase dashboard → **SQL Editor** → paste and run each file in
 - [`002_directory_and_description.sql`](./supabase/migrations/002_directory_and_description.sql)
   — `description`, `in_directory`, `owner_email` columns, directory RLS
   policy, and the `owner_email` trigger.
+- [`003_backfill_legacy_descriptions.sql`](./supabase/migrations/003_backfill_legacy_descriptions.sql)
+  — backfills placeholder descriptions on legacy rows so they pass the
+  minimum-length validation on save.
+- [`004_share_tokens_for_directory_artifacts.sql`](./supabase/migrations/004_share_tokens_for_directory_artifacts.sql)
+  — backfills `share_token` for legacy rows already in the directory.
 
 Migrations 001–004 are idempotent — safe to re-run.
 [`005_external_identity.sql`](./supabase/migrations/005_external_identity.sql)
@@ -75,7 +80,9 @@ which clears the shared `sb-*` cookies and redirects to the hub login.
 ### 4b. Branded email templates (optional)
 
 Paste the HTML from [`supabase/templates/`](./supabase/templates/) into
-**Authentication → Email Templates**. See
+**Authentication → Email Templates** — on the **hub identity project's**
+dashboard (project `elkplwruyikftwccarpy`), not this app's data project;
+auth emails are sent by the identity project. See
 [`supabase/templates/README.md`](./supabase/templates/README.md) for the
 file-to-slot mapping.
 
@@ -116,7 +123,7 @@ pnpm dlx vercel --prod
      across all tool projects)
    - `HUB_LOGIN_URL` — `https://tools.suncoast.studio/login`
    - `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` — this app's own data project
-   - `NEXT_PUBLIC_SITE_URL` — your production URL (e.g. `https://artifacts.tools.suncoast.studio`). Set this on **Production only**; leave Preview unset so previews fall back to `VERCEL_URL`.
+   - `NEXT_PUBLIC_SITE_URL` — your production URL (e.g. `https://artifacts.tools.suncoast.studio`). Set this on **Production only**. Preview deploys don't participate in SSO — the shared `.tools.suncoast.studio` cookie can't reach `*.vercel.app` — so leaving Preview unset (falling back to `http://localhost:3000`) is fine.
 4. **Deploy**.
 
 ### After the first deploy

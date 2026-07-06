@@ -34,6 +34,15 @@ describe("hubLoginUrl", () => {
         encodeURIComponent("https://artifacts.tools.suncoast.studio/dashboard"),
     );
   });
+
+  it("strips a trailing slash from NEXT_PUBLIC_SITE_URL", () => {
+    process.env.NEXT_PUBLIC_SITE_URL =
+      "https://artifacts.tools.suncoast.studio/";
+    expect(hubLoginUrl("/dashboard")).toBe(
+      "https://tools.suncoast.studio/login?next=" +
+        encodeURIComponent("https://artifacts.tools.suncoast.studio/dashboard"),
+    );
+  });
 });
 
 describe("requireUser", () => {
