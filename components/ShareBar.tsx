@@ -52,13 +52,19 @@ export function ShareBar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b-[1.5px] border-ink/12 bg-paper-deep/40 px-4 py-2.5 text-sm">
+    <div className="flex flex-wrap items-center gap-3 border-b border-sea/12 bg-shell-deep/40 px-4 py-2.5 text-sm">
       <div className="flex min-w-0 items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg border-[1.5px] border-ink bg-paper-soft shadow-[2px_2px_0_var(--ink)]">
+        <span
+          className={
+            isShared
+              ? "flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-b from-sand to-sand-deep text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
+              : "flex h-9 w-9 items-center justify-center rounded-full border border-sea/25 bg-shell-bright text-ink-mute"
+          }
+        >
           {isShared ? (
-            <Globe className="h-4 w-4 text-orange-deep" />
+            <Globe className="h-4 w-4" />
           ) : (
-            <Lock className="h-4 w-4 text-ink-mute" />
+            <Lock className="h-4 w-4" />
           )}
         </span>
         <span className="min-w-0">
@@ -74,12 +80,12 @@ export function ShareBar({
       </div>
       <div className="ml-auto flex min-w-0 flex-wrap items-center gap-2">
         {isShared && (
-          <div className="flex min-w-0 items-center gap-1 rounded-lg border-[1.5px] border-ink/25 bg-paper-soft px-2">
-            <Link2 className="h-3.5 w-3.5 text-ink-mute" />
+          <div className="flex min-w-0 items-center gap-1 rounded-full border border-sea/25 bg-shell-bright px-2.5">
+            <Link2 className="h-3.5 w-3.5 shrink-0 text-sea" />
             <Input
               readOnly
               value={shareUrl}
-              className="h-7 w-72 max-w-[55vw] border-0 px-1 text-xs code-font focus-visible:ring-0"
+              className="h-7 w-72 max-w-[55vw] rounded-none border-0 bg-transparent px-1 text-xs code-font focus-visible:ring-0"
               onFocus={(e) => e.currentTarget.select()}
             />
             <Button
@@ -90,7 +96,7 @@ export function ShareBar({
               aria-label="Copy share link"
             >
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-orange-deep" />
+                <Check className="h-3.5 w-3.5 text-amber-deep" />
               ) : (
                 <Copy className="h-3.5 w-3.5" />
               )}

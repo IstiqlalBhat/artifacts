@@ -1,25 +1,43 @@
-import type { Metadata } from "next";
-import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, Lobster, Noto_Sans, Poppins } from "next/font/google";
 import "./globals.css";
 import { ImportStagingProvider } from "@/components/ImportStagingProvider";
 
-const sans = Hanken_Grotesk({
+// Noto Sans — body copy (suncoast.studio body face)
+const sans = Noto_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const display = Bricolage_Grotesque({
+// Poppins — Suncoast's display/UI face (headings, nav, buttons)
+const display = Poppins({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
+// Lobster — the warm script used for Suncoast's emotional headlines
+const script = Lobster({
+  variable: "--font-script",
   subsets: ["latin"],
+  weight: ["400"],
   display: "swap",
 });
+
+// Plex Mono — file names + code, only inside the tool surfaces
+const mono = IBM_Plex_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+export const viewport: Viewport = {
+  themeColor: "#165a5b",
+};
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
@@ -53,7 +71,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${display.variable} ${mono.variable} h-full antialiased`}
+      className={`${sans.variable} ${display.variable} ${script.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ImportStagingProvider>{children}</ImportStagingProvider>
