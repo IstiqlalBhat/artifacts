@@ -8,7 +8,7 @@ import {
   type ArtifactFile,
   type ArtifactKind,
 } from "@/lib/renderer";
-import { createClient } from "@/lib/supabase/server";
+import { supabaseData } from "@/lib/supabase/data";
 
 type Params = Promise<{ shareId: string }>;
 
@@ -25,7 +25,7 @@ type Row = {
 };
 
 async function fetchShared(shareId: string): Promise<Row | null> {
-  const supabase = await createClient();
+  const supabase = supabaseData();
   const { data, error } = await supabase
     .from("artifacts")
     .select("id, title, kind, files, entry")
@@ -81,7 +81,7 @@ export default async function SharePage({ params }: { params: Params }) {
           <span className="chip shrink-0">{data.kind}</span>
         </div>
         <Link
-          href="/signup"
+          href="/"
           className="code-font shrink-0 text-[0.7rem] uppercase tracking-[0.15em] text-ink-mute transition-colors hover:text-cobalt"
         >
           Make your own →

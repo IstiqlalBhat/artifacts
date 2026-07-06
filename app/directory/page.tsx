@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ArrowRight, Clock3, FileCode2, Library, User } from "lucide-react";
 import { Header } from "@/components/Header";
 import { DirectoryCopyButton } from "@/components/DirectoryCopyButton";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
+import { supabaseData } from "@/lib/supabase/data";
 import { formatDate } from "@/lib/utils";
-import { redirect } from "next/navigation";
 
 type Row = {
   id: string;
@@ -17,11 +17,8 @@ type Row = {
 };
 
 export default async function DirectoryPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/directory");
+  await requireUser("/directory");
+  const supabase = supabaseData();
 
   const { data, error } = await supabase
     .from("artifacts")

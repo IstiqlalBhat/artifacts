@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeft, User } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ArtifactRenderer } from "@/components/ArtifactRenderer";
@@ -8,7 +8,8 @@ import {
   type ArtifactFile,
   type ArtifactKind,
 } from "@/lib/renderer";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
+import { supabaseData } from "@/lib/supabase/data";
 
 type Params = Promise<{ id: string }>;
 
@@ -18,11 +19,8 @@ export default async function DirectoryArtifactPage({
   params: Params;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?redirect=/d/${id}`);
+  const user = await requireUser(`/d/${id}`);
+  const supabase = supabaseData();
 
   const { data, error } = await supabase
     .from("artifacts")

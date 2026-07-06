@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { PreviewFrame } from "@/components/PreviewFrame";
+import { hubLoginUrl } from "@/lib/auth";
 import { getCurrentUser, isConfigured } from "@/lib/supabase/server";
 import { ArtifactRenderer } from "@/components/ArtifactRenderer";
 import { buildArtifactDocument } from "@/lib/renderer";
@@ -167,9 +168,9 @@ export default async function Home() {
   const user = await getCurrentUser();
   const configured = isConfigured();
 
-  const primaryHref = user ? "/new" : "/signup";
-  const primaryLabel = user ? "Create artifact" : "Start free";
-  const secondaryHref = user ? "/dashboard" : "/login";
+  const primaryHref = user ? "/new" : hubLoginUrl("/dashboard");
+  const primaryLabel = user ? "Create artifact" : "Sign in";
+  const secondaryHref = user ? "/dashboard" : hubLoginUrl("/dashboard");
   const secondaryLabel = user ? "Open library" : "Sign in";
 
   return (
@@ -216,13 +217,25 @@ export default async function Home() {
               </p>
 
               <div className="animate-rise-in motion-delay-3 mt-9 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link href={primaryHref} className="btn-cobalt w-full sm:w-auto">
-                  {primaryLabel}
-                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-                <Link href={secondaryHref} className="btn-paper w-full sm:w-auto">
-                  {secondaryLabel}
-                </Link>
+                {user ? (
+                  <Link href={primaryHref} className="btn-cobalt w-full sm:w-auto">
+                    {primaryLabel}
+                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <a href={primaryHref} className="btn-cobalt w-full sm:w-auto">
+                    {primaryLabel}
+                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                )}
+                {user && (
+                  <Link
+                    href={secondaryHref}
+                    className="btn-paper w-full sm:w-auto"
+                  >
+                    {secondaryLabel}
+                  </Link>
+                )}
               </div>
 
               <div className="animate-rise-in motion-delay-4 mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[0.82rem] font-medium text-ink-mute">
@@ -340,7 +353,7 @@ export default async function Home() {
               <Step
                 n="03"
                 title="Send the link"
-                body="Toggle the share switch on, copy the public URL, send it to anyone. They get the running version — no login required."
+                body="Toggle the share switch on, copy the public URL, send it to anyone. They get the running version — no sign-in required."
                 hint="public/<shareId>"
               />
             </div>
@@ -425,14 +438,16 @@ export default async function Home() {
             </p>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href={primaryHref} className="btn-orange w-full sm:w-auto">
-                {user ? "Create artifact" : "Create your account"}
-                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-              {!user && (
-                <Link href="/login" className="btn-paper w-full sm:w-auto">
-                  Sign in
+              {user ? (
+                <Link href={primaryHref} className="btn-orange w-full sm:w-auto">
+                  Create artifact
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
+              ) : (
+                <a href={primaryHref} className="btn-orange w-full sm:w-auto">
+                  Sign in
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                </a>
               )}
             </div>
           </div>

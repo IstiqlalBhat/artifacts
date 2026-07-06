@@ -12,10 +12,9 @@ import { Header } from "@/components/Header";
 import { DashboardDropZone } from "@/components/DashboardDropZone";
 import { DeleteArtifactButton } from "@/components/DeleteArtifactButton";
 import { DirectoryToggle } from "@/components/DirectoryToggle";
-import { buttonStyles } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
+import { supabaseData } from "@/lib/supabase/data";
 import { formatDate } from "@/lib/utils";
-import { redirect } from "next/navigation";
 
 type Row = {
   id: string;
@@ -29,11 +28,8 @@ type Row = {
 };
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/dashboard");
+  const user = await requireUser("/dashboard");
+  const supabase = supabaseData();
 
   const { data, error } = await supabase
     .from("artifacts")

@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
-import { createClient } from "@/lib/supabase/server";
+import { currentAllowedUser } from "@/lib/auth";
+import { supabaseData } from "@/lib/supabase/data";
 import type { ArtifactKind, ArtifactFile } from "@/lib/renderer";
 import { MIN_DESCRIPTION_CHARS } from "@/lib/validation";
 
@@ -45,7 +46,7 @@ function bundleTooBig(files: ArtifactFile[]): string | null {
 }
 
 async function getShareToken(id: string): Promise<string | null> {
-  const supabase = await createClient();
+  const supabase = supabaseData();
   const { data } = await supabase
     .from("artifacts")
     .select("share_token")
@@ -57,7 +58,7 @@ async function getShareToken(id: string): Promise<string | null> {
 async function getShareState(
   id: string,
 ): Promise<{ share_token: string | null; in_directory: boolean }> {
-  const supabase = await createClient();
+  const supabase = supabaseData();
   const { data } = await supabase
     .from("artifacts")
     .select("share_token, in_directory")
@@ -87,13 +88,11 @@ export async function createArtifact(input: {
   description?: string | null;
   inDirectory?: boolean;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await currentAllowedUser();
   if (!user) {
     return { error: "Not signed in" };
   }
+  const supabase = supabaseData();
 
   const title = input.title.trim();
   const titleErr = titleInvalid(title, true);
@@ -115,6 +114,7 @@ export async function createArtifact(input: {
     .from("artifacts")
     .insert({
       owner: user.id,
+      owner_email: user.email,
       title,
       kind: input.kind,
       files: input.files,
@@ -144,11 +144,9 @@ export async function updateArtifact(
     inDirectory?: boolean;
   },
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await currentAllowedUser();
   if (!user) return { error: "Not signed in" };
+  const supabase = supabaseData();
 
   if (patch.files) {
     const sizeError = bundleTooBig(patch.files);
@@ -195,11 +193,9 @@ export async function updateArtifact(
 }
 
 export async function toggleDirectory(id: string, inDirectory: boolean) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await currentAllowedUser();
   if (!user) return { error: "Not signed in" };
+  const supabase = supabaseData();
 
   const patch: Record<string, unknown> = { in_directory: inDirectory };
   if (inDirectory) {
@@ -221,11 +217,9 @@ export async function toggleDirectory(id: string, inDirectory: boolean) {
 }
 
 export async function toggleShare(id: string, share: boolean) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await currentAllowedUser();
   if (!user) return { error: "Not signed in" };
+  const supabase = supabaseData();
 
   const { share_token: existingToken, in_directory } = await getShareState(id);
   if (!share && in_directory) {
@@ -250,11 +244,9 @@ export async function toggleShare(id: string, share: boolean) {
 export async function deleteArtifact(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await currentAllowedUser();
   if (!user) return;
+  const supabase = supabaseData();
 
   const existingToken = await getShareToken(id);
 

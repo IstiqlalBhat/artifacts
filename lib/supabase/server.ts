@@ -1,21 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-
-const PUBLISHABLE_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { cookieDomainOptions } from "@/lib/auth-helpers";
 
 export function isConfigured() {
-  return !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!PUBLISHABLE_KEY;
+  return (
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
 }
 
+// Cookie-scoped client for the shared IDENTITY project (hub SSO). Auth only —
+// all artifact data lives in this app's own project, reached via supabaseData().
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://localhost",
-    PUBLISHABLE_KEY ?? "anon",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "anon",
     {
+      cookieOptions: cookieDomainOptions(),
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -26,7 +29,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Called from a Server Component — middleware handles refresh.
+            // Called from a Server Component — proxy handles refresh.
           }
         },
       },

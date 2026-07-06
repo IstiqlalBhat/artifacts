@@ -2,33 +2,52 @@
 
 Upload HTML, CSS, JS, or JSX. Render it in a sandboxed iframe. Share it with a public link.
 
-Built with **Next.js 16** (App Router) + **Supabase** (auth, Postgres, RLS) + **Tailwind 4**.
+Built with **Next.js 16** (App Router) + **Supabase** (Postgres) + **Tailwind 4**.
+Sign-in is centralized behind the shared hub SSO at
+[tools.suncoast.studio](https://tools.suncoast.studio) — this app has no
+login/signup pages of its own.
 
 ## Features
 
-- Email + password auth (Supabase)
+- Hub SSO auth — one shared session across all `*.tools.suncoast.studio` tools
 - Drag-and-drop file upload (or paste code) — multiple files per artifact
 - Live preview, sandboxed iframe rendering
 - JSX/TSX support via Babel standalone + React 18 (in the iframe)
 - Per-artifact public share link, toggleable
-- Row-level security: artifacts are private by default
+- Artifacts are private by default (owner checks in the service-role data layer)
 - Share pages cached for 1h, invalidated immediately on edit/unshare
 
 ## Local setup
 
-### 1. Supabase project
+### 1. Supabase projects
 
-[supabase.com](https://supabase.com) → New project. Copy:
+Identity and data are split across two Supabase projects:
 
-- **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-- **Publishable key** (or legacy anon key) → `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- **Identity** — the shared hub SSO project, the same one every tool uses.
+  Its URL and anon key go in `NEXT_PUBLIC_SUPABASE_URL` and
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Data** — this app's own project holding the `artifacts` table, accessed
+  server-side with the service role: `SUPABASE_URL` +
+  `SUPABASE_SERVICE_ROLE_KEY`.
 
 ### 2. Environment
 
 ```bash
 cp .env.example .env.local
-# fill in the two values above
+# the URLs are pre-filled; fill in the two keys
 ```
+
+Beyond the four Supabase vars above:
+
+- `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` — `.tools.suncoast.studio` in prod, and it
+  must be **identical across all tool Vercel projects** (that's what makes the
+  session shared). Leave empty for local dev (host-only cookie).
+- `HUB_LOGIN_URL` — where signed-out users are sent
+  (`https://tools.suncoast.studio/login`).
+- `NEXT_PUBLIC_SITE_URL` — this app's own URL.
+
+There are no login/signup pages in this app — sign in through the hub at
+[tools.suncoast.studio](https://tools.suncoast.studio).
 
 ### 3. Run the SQL migrations
 
@@ -41,13 +60,17 @@ Supabase dashboard → **SQL Editor** → paste and run each file in
   — `description`, `in_directory`, `owner_email` columns, directory RLS
   policy, and the `owner_email` trigger.
 
-All migrations are idempotent — safe to re-run.
+Migrations 001–004 are idempotent — safe to re-run.
+[`005_external_identity.sql`](./supabase/migrations/005_external_identity.sql)
+is part of the hub-SSO cutover (drops the local-auth FK + `owner_email`
+trigger) and is applied once, at cutover — not before.
 
-### 4. Auth options (optional)
+### 4. Auth configuration
 
-**Authentication → Providers → Email** → toggle off "Confirm email" so signup
-is instant. Keep it on if you want verification; then add
-`http://localhost:3000/auth/callback` to **URL Configuration → Redirect URLs**.
+None here. Providers, redirect URLs, and email confirmation are configured on
+the hub's identity project — this app no longer has `/auth/callback` or
+login/signup routes. The only auth route it owns is `POST /auth/signout`,
+which clears the shared `sb-*` cookies and redirects to the hub login.
 
 ### 4b. Branded email templates (optional)
 
@@ -72,8 +95,12 @@ Open <http://localhost:3000>.
 ```bash
 pnpm dlx vercel@latest        # first-time link (will prompt to create project)
 pnpm dlx vercel env add NEXT_PUBLIC_SUPABASE_URL
-pnpm dlx vercel env add NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-pnpm dlx vercel env add NEXT_PUBLIC_SITE_URL   # https://your-domain.com
+pnpm dlx vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
+pnpm dlx vercel env add NEXT_PUBLIC_AUTH_COOKIE_DOMAIN   # .tools.suncoast.studio
+pnpm dlx vercel env add HUB_LOGIN_URL                    # https://tools.suncoast.studio/login
+pnpm dlx vercel env add SUPABASE_URL
+pnpm dlx vercel env add SUPABASE_SERVICE_ROLE_KEY
+pnpm dlx vercel env add NEXT_PUBLIC_SITE_URL             # https://artifacts.tools.suncoast.studio
 pnpm dlx vercel --prod
 ```
 
@@ -81,20 +108,22 @@ pnpm dlx vercel --prod
 
 1. Push the repo to GitHub.
 2. <https://vercel.com/new> → import the repo. Framework auto-detects as Next.js.
-3. Add the three env vars in **Project Settings → Environment Variables** for
+3. Add the env vars in **Project Settings → Environment Variables** for
    **Production** and **Preview**:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `NEXT_PUBLIC_SITE_URL` — your production URL (e.g. `https://svsartifacts.com`). Set this on **Production only**; leave Preview unset so previews fall back to `VERCEL_URL`.
+   - `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the shared
+     identity (hub SSO) project
+   - `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` — `.tools.suncoast.studio` (identical
+     across all tool projects)
+   - `HUB_LOGIN_URL` — `https://tools.suncoast.studio/login`
+   - `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` — this app's own data project
+   - `NEXT_PUBLIC_SITE_URL` — your production URL (e.g. `https://artifacts.tools.suncoast.studio`). Set this on **Production only**; leave Preview unset so previews fall back to `VERCEL_URL`.
 4. **Deploy**.
 
-### After the first deploy — point Supabase at production
+### After the first deploy
 
-Supabase dashboard → **Authentication → URL Configuration**:
-
-- **Site URL** → your production URL
-- **Redirect URLs** → add `https://your-domain.com/auth/callback` (keep the
-  localhost one too for dev).
+No Supabase auth URL configuration is needed here — **Site URL** and redirect
+URLs live on the hub's identity project, and this app has no `/auth/callback`
+route.
 
 Existing share links keep working — the share token is stored in the DB and
 doesn't depend on the host. Any links you sent with `localhost` in them die;
@@ -119,11 +148,12 @@ so artifact code can't reach into the parent page, cookies, or storage.
 ```
 app/
   page.tsx                 Landing page (live JSX demo in an iframe)
-  login/, signup/          Auth pages + server actions
-  auth/callback/, logout/  Auth route handlers
+  auth/signout/            POST /auth/signout — purges sb-* cookies, redirects to hub login
   dashboard/               User dashboard
   new/                     Create artifact
   a/[id]/                  Owner view + editor + share bar
+  d/[id]/                  Directory artifact view (signed-in users)
+  directory/               Team directory of shared artifacts
   s/[shareId]/             Public share view (cached, OpenGraph metadata)
   not-found.tsx            404 page
 components/
@@ -134,9 +164,10 @@ components/
 lib/
   renderer.ts              Builds the iframe document
   artifacts.ts             Server actions (create / update / share / delete)
-  supabase/                client.ts, server.ts, middleware.ts
+  auth.ts                  requireUser() — hub SSO session + allowlist gate
+  supabase/                server.ts (identity session), data.ts (service-role data client)
   utils.ts
-supabase/migrations/       SQL schema + RLS
-proxy.ts                   Auth refresh + route guard (Next 16 replaces middleware.ts)
+supabase/migrations/       SQL schema
+proxy.ts                   Session cookie refresh (Next 16 replaces middleware.ts)
 vercel.ts                  Vercel deploy config (cache headers)
 ```
