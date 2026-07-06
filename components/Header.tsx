@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SquareDashedMousePointer, LogOut, Plus } from "lucide-react";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { hubLoginUrl } from "@/lib/auth";
 import { Button, buttonStyles } from "@/components/ui/button";
 
 const navLink =
@@ -44,7 +45,7 @@ export async function Header() {
               <span className="hidden max-w-52 truncate code-font text-xs text-ink-mute md:inline">
                 {user.email}
               </span>
-              <form action="/auth/logout" method="post">
+              <form action="/auth/signout" method="post">
                 <Button
                   size="icon"
                   variant="ghost"
@@ -56,14 +57,12 @@ export async function Header() {
               </form>
             </>
           ) : (
-            <>
-              <Link href="/login" className={`hidden sm:inline ${navLink}`}>
-                Sign in
-              </Link>
-              <Link href="/signup" className={buttonStyles({ size: "sm" })}>
-                Sign up
-              </Link>
-            </>
+            <a
+              href={hubLoginUrl("/dashboard")}
+              className={buttonStyles({ size: "sm" })}
+            >
+              Sign in
+            </a>
           )}
         </div>
       </div>
