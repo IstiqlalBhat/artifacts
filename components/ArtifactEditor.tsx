@@ -354,15 +354,15 @@ export function ArtifactEditor(props: Props) {
 
   const segBtn = (selected: boolean) =>
     cn(
-      "flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition-colors",
+      "flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
       selected
-        ? "bg-cobalt text-paper-soft"
-        : "text-ink-mute hover:bg-paper-deep hover:text-ink",
+        ? "bg-gradient-to-b from-sea to-sea-deep text-shell-bright shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+        : "text-ink-mute hover:bg-shell-deep hover:text-ink",
     );
 
   return (
     <div
-      className="flex h-full flex-col bg-paper"
+      className="flex h-full flex-col bg-shell"
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -370,7 +370,7 @@ export function ArtifactEditor(props: Props) {
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
     >
-      <div className="border-b-[1.5px] border-ink/15 bg-paper/95 px-3 py-3">
+      <div className="border-b border-sea/15 bg-shell/95 px-3 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex min-w-[14rem] flex-1 flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -378,10 +378,10 @@ export function ArtifactEditor(props: Props) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title"
-                className="h-9 max-w-md border-0 bg-paper-deep/55 text-base font-bold focus-visible:ring-1"
+                className="h-9 max-w-md rounded-lg border-0 bg-shell-deep/55 text-base font-bold focus-visible:ring-1"
               />
               <span className="hidden whitespace-nowrap code-font text-xs text-ink-mute sm:inline">
-                {files.length} file{files.length === 1 ? "" : "s"} /{" "}
+                {files.length} file{files.length === 1 ? "" : "s"} ·{" "}
                 {kind === "jsx" ? "React" : "HTML"}
               </span>
             </div>
@@ -391,13 +391,15 @@ export function ArtifactEditor(props: Props) {
               placeholder="Description (required, min 10 chars) — shown on the dashboard and in the SVS Directory"
               aria-required
               className={cn(
-                "h-8 max-w-2xl border-0 bg-paper-deep/30 text-xs focus-visible:ring-1",
-                descriptionInvalid && "ring-1 ring-destructive/40",
+                "h-8 max-w-2xl rounded-lg border-0 bg-shell-deep/35 text-xs focus-visible:ring-1",
+                trimmedDescription.length > 0 &&
+                  descriptionInvalid &&
+                  "ring-1 ring-destructive/40",
               )}
             />
           </div>
 
-          <div className="flex items-center gap-1 rounded-lg border-[1.5px] border-ink/25 bg-paper-soft p-0.5">
+          <div className="flex items-center gap-1 rounded-full border border-sea/25 bg-shell-bright p-0.5">
             <button
               type="button"
               onClick={() => setTab("code")}
@@ -442,10 +444,10 @@ export function ArtifactEditor(props: Props) {
               onClick={() => setInDirectory((v) => !v)}
               aria-pressed={inDirectory}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-md border-[1.5px] px-3 text-xs font-semibold transition-colors",
+                "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition-colors",
                 inDirectory
-                  ? "border-ink bg-orange/15 text-orange-deep"
-                  : "border-ink/25 bg-paper-soft text-ink-mute hover:bg-paper-deep hover:text-ink",
+                  ? "border-amber/60 bg-sand/35 text-amber-deep"
+                  : "border-sea/25 bg-shell-bright text-ink-mute hover:bg-shell-deep hover:text-ink",
               )}
             >
               <Globe2 className="h-3.5 w-3.5" />
@@ -462,7 +464,7 @@ export function ArtifactEditor(props: Props) {
                   e.target.value = "";
                 }}
               />
-              <span className="inline-flex h-8 items-center gap-1.5 rounded-md border-[1.5px] border-ink/25 bg-paper-soft px-3 text-xs font-semibold transition-colors hover:bg-paper-deep">
+              <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-sea/25 bg-shell-bright px-3 text-xs font-semibold text-ink-soft transition-colors hover:bg-shell-deep">
                 <Upload className="h-3.5 w-3.5" />
                 Upload
               </span>
@@ -489,7 +491,7 @@ export function ArtifactEditor(props: Props) {
         </div>
       </div>
 
-      <div className="border-b-[1.5px] border-ink/12 bg-paper-deep/40 md:hidden">
+      <div className="border-b border-sea/12 bg-shell-deep/40 md:hidden">
         <div className="scroll-thin flex items-center gap-2 overflow-x-auto px-3 py-2">
           {files.map((file) => (
             <button
@@ -497,10 +499,10 @@ export function ArtifactEditor(props: Props) {
               key={file.name}
               onClick={() => setActiveName(file.name)}
               className={cn(
-                "flex h-8 shrink-0 items-center gap-1.5 rounded-md border-[1.5px] px-2.5 text-xs transition-colors",
+                "flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs transition-colors",
                 activeName === file.name
-                  ? "border-ink bg-orange/12 text-orange-deep"
-                  : "border-ink/20 bg-paper-soft text-ink-mute",
+                  ? "border-amber/60 bg-sand/30 text-amber-deep"
+                  : "border-sea/20 bg-shell-bright text-ink-mute",
               )}
             >
               <FileCode2 className="h-3.5 w-3.5" />
@@ -510,7 +512,7 @@ export function ArtifactEditor(props: Props) {
           <button
             type="button"
             onClick={insertNewFile}
-            className="flex h-8 shrink-0 items-center gap-1.5 rounded-md border-[1.5px] border-ink/20 bg-paper-soft px-2.5 text-xs text-ink-mute"
+            className="flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-sea/20 bg-shell-bright px-3 text-xs text-ink-mute"
           >
             <FilePlus2 className="h-3.5 w-3.5" />
             New file
@@ -526,13 +528,13 @@ export function ArtifactEditor(props: Props) {
             : "grid-rows-[minmax(0,1fr)]",
         )}
       >
-        <aside className="hidden border-r-[1.5px] border-ink/12 bg-paper-deep/40 md:flex md:flex-col">
-          <div className="mono-label flex items-center justify-between border-b-[1.5px] border-ink/12 px-3 py-2.5">
+        <aside className="hidden border-r border-sea/12 bg-shell-deep/40 md:flex md:flex-col">
+          <div className="mono-label flex items-center justify-between border-b border-sea/12 px-3 py-2.5">
             Files
             <button
               type="button"
               onClick={insertNewFile}
-              className="rounded p-1 text-ink-mute transition-colors hover:bg-paper-deep hover:text-cobalt"
+              className="rounded-full p-1 text-ink-mute transition-colors hover:bg-shell-deep hover:text-sea-deep"
               aria-label="New file"
             >
               <FilePlus2 className="h-3.5 w-3.5" />
@@ -548,20 +550,20 @@ export function ArtifactEditor(props: Props) {
               onSetEntry={(name) => setEntry(name)}
             />
           </div>
-          <p className="border-t-[1.5px] border-ink/12 px-3 py-2 text-[11px] leading-snug text-ink-mute">
+          <p className="border-t border-sea/12 px-3 py-2 text-[11px] leading-snug text-ink-mute">
             Drag files anywhere. Set an entry file to control the first run.
           </p>
         </aside>
 
         <section
           className={cn(
-            "flex min-h-0 flex-col border-r-[1.5px] border-ink/12 bg-paper-soft",
+            "flex min-h-0 flex-col border-r border-sea/12 bg-shell-bright",
             tab === "preview" && "hidden",
             tab === "code" && "md:col-span-2",
           )}
         >
-          <div className="flex h-9 items-center gap-2 border-b-[1.5px] border-ink/12 bg-paper-deep/50 px-3 text-xs">
-            <FileCode2 className="h-3.5 w-3.5 text-cobalt" />
+          <div className="flex h-9 items-center gap-2 border-b border-sea/12 bg-shell-deep/50 px-3 text-xs">
+            <FileCode2 className="h-3.5 w-3.5 text-sea" />
             <span className="code-font truncate text-ink">
               {activeFile?.name ?? "No file"}
             </span>
@@ -570,10 +572,10 @@ export function ArtifactEditor(props: Props) {
                 type="button"
                 onClick={() => setEntry(activeFile.name)}
                 className={cn(
-                  "ml-auto rounded-md border-[1.5px] px-2 py-0.5 text-[11px] font-semibold transition-colors",
+                  "ml-auto rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors",
                   entry === activeFile.name
-                    ? "border-ink bg-orange/15 text-orange-deep"
-                    : "border-ink/25 bg-paper-soft text-ink-mute hover:text-ink",
+                    ? "border-amber/60 bg-sand/35 text-amber-deep"
+                    : "border-sea/25 bg-shell-bright text-ink-mute hover:text-ink",
                 )}
               >
                 {entry === activeFile.name ? "Entry file" : "Set as entry"}
@@ -593,7 +595,7 @@ export function ArtifactEditor(props: Props) {
             }
             onPaste={onPaste}
             spellCheck={false}
-            className="min-h-0 flex-1 resize-none rounded-none border-0 bg-ink px-4 py-3 text-[13px] leading-6 text-paper shadow-none placeholder:text-paper/35 focus-visible:ring-0"
+            className="min-h-0 flex-1 resize-none rounded-none border-0 bg-abyss px-4 py-3 text-[13px] leading-6 text-shell caret-sand shadow-none placeholder:text-shell/35 focus-visible:ring-0"
             placeholder="// Paste or type your code here"
           />
         </section>
@@ -605,9 +607,9 @@ export function ArtifactEditor(props: Props) {
             tab === "preview" && "md:col-span-2",
           )}
         >
-          <div className="flex h-9 items-center justify-between border-b-[1.5px] border-ink/12 bg-paper-soft px-3 text-xs text-ink-mute">
+          <div className="flex h-9 items-center justify-between border-b border-sea/12 bg-shell-bright px-3 text-xs text-ink-mute">
             <span className="flex items-center gap-2">
-              <Eye className="h-3.5 w-3.5 text-cobalt" />
+              <Eye className="h-3.5 w-3.5 text-sea" />
               Preview
             </span>
             <span className="mono-label hidden sm:inline">Sandboxed iframe</span>
@@ -615,7 +617,7 @@ export function ArtifactEditor(props: Props) {
           <div className="relative min-h-0 flex-1">
             <ArtifactRenderer doc={previewDoc} />
             {dragOver && (
-              <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-lg border-2 border-dashed border-orange bg-orange/10 text-sm font-bold text-orange-deep">
+              <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-xl border-2 border-dashed border-amber bg-sand/25 text-sm font-bold text-amber-deep">
                 Drop files to add them to this artifact
               </div>
             )}

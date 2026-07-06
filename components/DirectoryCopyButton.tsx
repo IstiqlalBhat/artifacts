@@ -45,7 +45,7 @@ export function DirectoryCopyButton({
         title={copied ? "Copied" : "Copy public URL"}
       >
         {copied ? (
-          <Check className="h-3.5 w-3.5 text-orange-deep" />
+          <Check className="h-3.5 w-3.5 text-amber-deep" />
         ) : (
           <Copy className="h-3.5 w-3.5" />
         )}

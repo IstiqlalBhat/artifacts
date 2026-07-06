@@ -21,16 +21,16 @@ export function DashboardDropZone({ children }: { children: React.ReactNode }) {
       {children}
 
       {(hover || (busy && !pending)) && (
-        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-paper/70 backdrop-blur-sm">
-          <div className="riso-card-pop flex max-w-md flex-col items-center gap-3 border-dashed px-8 py-10 text-center">
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-shell/75 backdrop-blur-sm">
+          <div className="plate flex max-w-md flex-col items-center gap-3 border-2 border-dashed border-amber/70 px-8 py-10 text-center">
             {busy ? (
               <>
-                <Loader2 className="h-8 w-8 animate-spin text-cobalt" />
+                <Loader2 className="h-8 w-8 animate-spin text-sea" />
                 <p className="display text-lg text-ink">Reading files…</p>
               </>
             ) : (
               <>
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl border-[1.5px] border-ink bg-orange text-ink shadow-[3px_3px_0_var(--ink)]">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-sand to-sand-deep text-ink shadow-[0_10px_24px_-12px_rgba(255,171,23,0.8)]">
                   <FolderPlus className="h-6 w-6" />
                 </span>
                 <p className="display text-xl text-ink">
@@ -38,8 +38,8 @@ export function DashboardDropZone({ children }: { children: React.ReactNode }) {
                 </p>
                 <p className="text-xs leading-relaxed text-ink-mute">
                   Folder name suggests the title. HTML, CSS, JS, JSX, TS, TSX,
-                  and images are imported with their relative paths. You&apos;ll
-                  add a description before saving.
+                  and images are imported with their relative paths.
+                  You&apos;ll add a description before saving.
                 </p>
               </>
             )}
@@ -58,7 +58,7 @@ export function DashboardDropZone({ children }: { children: React.ReactNode }) {
       )}
 
       {error && !busy && !pending && (
-        <div className="fixed bottom-4 left-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 rounded-lg border-[1.5px] border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive shadow-lg">
+        <div className="fixed bottom-4 left-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border border-destructive/40 bg-shell-bright px-3.5 py-2.5 text-sm text-destructive shadow-lg">
           <div className="flex items-start justify-between gap-3">
             <span>{error}</span>
             <button

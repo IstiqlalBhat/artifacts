@@ -40,13 +40,13 @@ export default async function DirectoryArtifactPage({
   });
 
   return (
-    <div className="flex h-screen flex-col bg-paper">
+    <div className="flex h-screen flex-col bg-shell">
       <Header />
-      <div className="border-b-[1.5px] border-ink/12 bg-paper-deep/40 px-4 py-3 sm:px-6">
+      <div className="border-b border-sea/12 bg-shell-deep/40 px-4 py-3 sm:px-6">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3">
           <Link
             href="/directory"
-            className="code-font inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.15em] text-ink-mute transition-colors hover:text-cobalt"
+            className="display inline-flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-ink-mute transition-colors hover:text-teal"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             SVS Directory

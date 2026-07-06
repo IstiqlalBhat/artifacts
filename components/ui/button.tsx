@@ -11,21 +11,21 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-cobalt text-paper-soft border-[1.5px] border-ink shadow-[2px_2px_0_var(--ink)] hover:bg-cobalt-deep hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_var(--ink)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_var(--ink)]",
+    "bg-teal text-white border border-teal-deep shadow-[0_10px_20px_-12px_rgba(14,65,66,0.7),inset_0_1px_0_rgba(255,255,255,0.16)] hover:bg-teal-deep hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-12px_rgba(14,65,66,0.78),0_0_0_3px_rgba(255,171,23,0.22)] active:translate-y-0 active:shadow-none",
   secondary:
-    "bg-paper-soft text-ink border-[1.5px] border-ink shadow-[2px_2px_0_var(--ink)] hover:bg-white hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_var(--orange)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_var(--ink)]",
+    "bg-white text-teal border-[1.5px] border-teal/20 hover:bg-teal hover:border-teal hover:text-white hover:-translate-y-0.5 active:translate-y-0",
   outline:
-    "border-[1.5px] border-ink bg-transparent text-ink hover:bg-paper-deep",
-  ghost: "text-ink hover:bg-paper-deep",
+    "border-[1.5px] border-teal/25 bg-transparent text-teal hover:bg-teal hover:border-teal hover:text-white",
+  ghost: "text-ink-soft hover:bg-teal-tint hover:text-teal",
   destructive:
-    "bg-destructive text-white border-[1.5px] border-ink shadow-[2px_2px_0_var(--ink)] hover:brightness-95 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_var(--ink)]",
+    "bg-rust text-white border border-rust-deep shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] hover:bg-rust-deep active:translate-y-px",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-xs rounded-lg",
-  md: "h-9 px-4 text-sm rounded-lg",
-  lg: "h-11 px-5 text-sm rounded-[11px]",
-  icon: "h-9 w-9 rounded-lg",
+  sm: "h-8 px-3.5 text-xs rounded-[10px]",
+  md: "h-9 px-4 text-sm rounded-xl",
+  lg: "h-11 px-6 text-sm rounded-[14px]",
+  icon: "h-9 w-9 rounded-xl",
 };
 
 export function buttonStyles({
@@ -38,8 +38,8 @@ export function buttonStyles({
   className?: string;
 } = {}) {
   return cn(
-    "inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.01em]",
-    "transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "display inline-flex items-center justify-center gap-2 font-semibold tracking-[0.005em]",
+    "transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none",
     variants[variant],
     sizes[size],

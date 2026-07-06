@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SquareDashedMousePointer } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { ArtifactRenderer } from "@/components/ArtifactRenderer";
 import {
   buildArtifactDocument,
@@ -66,23 +66,24 @@ export default async function SharePage({ params }: { params: Params }) {
   });
 
   return (
-    <div className="flex h-screen flex-col bg-paper">
-      <header className="flex h-14 items-center justify-between gap-3 border-b-[1.5px] border-ink/15 bg-paper px-4">
+    <div className="flex h-screen flex-col bg-shell">
+      <header className="flex h-14 items-center justify-between gap-3 border-b border-teal/10 bg-white px-4">
         <Link href="/" className="group flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg border-[1.5px] border-ink bg-cobalt text-paper-soft shadow-[2px_2px_0_var(--ink)] transition-transform group-hover:-translate-y-0.5">
-            <SquareDashedMousePointer className="h-4 w-4" />
-          </span>
-          <span className="display text-base text-ink">Artifacts</span>
+          <BrandMark className="h-8 w-8 transition-transform duration-300 group-hover:-rotate-6" />
+          <span className="script text-[1.15rem] text-teal">Artifacts</span>
         </Link>
         <div className="flex min-w-0 items-center gap-3">
-          <span className="truncate text-sm font-semibold text-ink" title={data.title}>
+          <span
+            className="truncate text-sm font-semibold text-ink"
+            title={data.title}
+          >
             {data.title}
           </span>
           <span className="chip shrink-0">{data.kind}</span>
         </div>
         <Link
           href="/"
-          className="code-font shrink-0 text-[0.7rem] uppercase tracking-[0.15em] text-ink-mute transition-colors hover:text-cobalt"
+          className="display shrink-0 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-ink-mute transition-colors hover:text-teal"
         >
           Make your own →
         </Link>

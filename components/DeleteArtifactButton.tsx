@@ -13,7 +13,7 @@ function ConfirmDeleteButton({ title }: { title: string }) {
       disabled={pending}
       aria-label={`Confirm delete ${title}`}
       aria-disabled={pending}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-md border-[1.5px] border-ink bg-destructive/15 text-destructive transition-colors hover:bg-destructive/25 disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-destructive/50 bg-destructive/15 text-destructive transition-colors hover:bg-destructive/25 disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Check className="h-4 w-4" />
     </button>
@@ -43,7 +43,7 @@ export function DeleteArtifactButton({
           type="button"
           aria-label="Cancel delete"
           onClick={() => setConfirming(false)}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border-[1.5px] border-ink/25 text-ink-mute transition-colors hover:bg-paper-deep"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sea/25 text-ink-mute transition-colors hover:bg-shell-deep"
         >
           <X className="h-4 w-4" />
         </button>
@@ -60,7 +60,7 @@ export function DeleteArtifactButton({
         event.preventDefault();
         setConfirming(true);
       }}
-      className="relative z-10 inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-mute transition-colors hover:bg-paper-deep hover:text-destructive"
+      className="relative z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-mute transition-colors hover:bg-destructive/10 hover:text-destructive"
     >
       <Trash2 className="h-4 w-4" />
     </button>
