@@ -45,24 +45,30 @@ function bundleTooBig(files: ArtifactFile[]): string | null {
   return null;
 }
 
-async function getShareToken(id: string): Promise<string | null> {
+async function getShareToken(
+  id: string,
+  ownerId: string,
+): Promise<string | null> {
   const supabase = supabaseData();
   const { data } = await supabase
     .from("artifacts")
     .select("share_token")
     .eq("id", id)
+    .eq("owner", ownerId)
     .maybeSingle();
   return (data?.share_token as string | null) ?? null;
 }
 
 async function getShareState(
   id: string,
+  ownerId: string,
 ): Promise<{ share_token: string | null; in_directory: boolean }> {
   const supabase = supabaseData();
   const { data } = await supabase
     .from("artifacts")
     .select("share_token, in_directory")
     .eq("id", id)
+    .eq("owner", ownerId)
     .maybeSingle();
   return {
     share_token: (data?.share_token as string | null) ?? null,
@@ -171,7 +177,7 @@ export async function updateArtifact(
     delete normalized.inDirectory;
   }
 
-  const existingToken = await getShareToken(id);
+  const existingToken = await getShareToken(id, user.id);
 
   if (patch.inDirectory === true && !existingToken) {
     normalized.share_token = nanoid(12);
@@ -199,7 +205,7 @@ export async function toggleDirectory(id: string, inDirectory: boolean) {
 
   const patch: Record<string, unknown> = { in_directory: inDirectory };
   if (inDirectory) {
-    const existingToken = await getShareToken(id);
+    const existingToken = await getShareToken(id, user.id);
     if (!existingToken) patch.share_token = nanoid(12);
   }
 
@@ -221,7 +227,10 @@ export async function toggleShare(id: string, share: boolean) {
   if (!user) return { error: "Not signed in" };
   const supabase = supabaseData();
 
-  const { share_token: existingToken, in_directory } = await getShareState(id);
+  const { share_token: existingToken, in_directory } = await getShareState(
+    id,
+    user.id,
+  );
   if (!share && in_directory) {
     return { error: "Remove from the SVS Directory first." };
   }
@@ -248,7 +257,7 @@ export async function deleteArtifact(formData: FormData) {
   if (!user) return;
   const supabase = supabaseData();
 
-  const existingToken = await getShareToken(id);
+  const existingToken = await getShareToken(id, user.id);
 
   await supabase
     .from("artifacts")
