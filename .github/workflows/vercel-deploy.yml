@@ -1,0 +1,122 @@
+# Deploy to Vercel from CI, using the team's admin token.
+#
+# Why this exists: Vercel refuses a git-triggered deployment when the commit
+# author is not a member of the Vercel team, and emails admin@ every time. The
+# alternatives were $20/user per seat, or having everyone commit as admin@ and
+# muddy the git history of their own work. Deploying from CI removes the
+# failure class instead: the deployment is made by this workflow holding a
+# token, so the commit author stops mattering.
+#
+# ClickUp: https://app.clickup.com/t/9011606217/868m06w8m
+#
+# Vercel's own Git integration is DISCONNECTED for this project. That is what
+# actually stops the duplicate failing deploys -- setting
+# gitProviderOptions.createDeployments to "disabled" is accepted by the API and
+# then ignored, so the integration keeps firing. Do not reconnect it without
+# removing this workflow first, or every push deploys twice.
+
+name: Vercel Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: vercel-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      # `vercel pull` writes the project's real settings (framework, root
+      # directory, build command, env) into .vercel, so the build below matches
+      # what the dashboard would have produced. Building without it is how a CI
+      # deploy silently diverges from the git deploy it replaces.
+      - name: Pull Vercel environment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          TARGET: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        run: vercel pull --yes --environment="$TARGET" --token="$VERCEL_TOKEN"
+
+      - name: Build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          IS_PROD: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          # Branch explicitly rather than expanding a possibly-empty variable:
+          # unquoted it trips shellcheck, quoted it passes an empty argument.
+          if [ "$IS_PROD" = "true" ]; then
+            vercel build --prod --token="$VERCEL_TOKEN"
+          else
+            vercel build --token="$VERCEL_TOKEN"
+          fi
+
+      # --prebuilt uploads what was built above rather than rebuilding on
+      # Vercel, so what CI produced is exactly what ships.
+      - name: Deploy
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          IS_PROD: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          # Captured, never piped: a pipeline reports the LAST command's status,
+          # so a failing deploy would read as success.
+          if [ "$IS_PROD" = "true" ]; then
+            url="$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")"
+          else
+            url="$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")"
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed to $url"
+
+      - name: Comment the preview URL on the PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+        with:
+          script: |
+            const url = process.env.PREVIEW_URL;
+            const marker = '<!-- vercel-preview -->';
+            const body = `${marker}\nPreview: ${url}`;
+            // Update our own comment rather than adding one per push, so a
+            // long-running PR does not accumulate a wall of preview links.
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
