@@ -41,6 +41,16 @@ jobs:
         with:
           node-version: 22
 
+      # Vercel's own builders ship pnpm and yarn; the arc-runner-set image does
+      # not, so a repo declaring packageManager: pnpm dies on "spawn pnpm
+      # ENOENT" during vercel build. Corepack ships with Node 22 and installs
+      # whatever each repo's package.json declares, so this is one line that
+      # covers npm, pnpm and yarn rather than a per-repo setup step.
+      - name: Enable corepack
+        run: corepack enable
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
